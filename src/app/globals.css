@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-lexend: 'Lexend', system-ui, sans-serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-inter);
+  background-color: #f5f5f4;
+  color: #1c1917;
+}
+
+.font-display, .fd {
+  font-family: var(--font-lexend);
+}
+
+.font-body, .fb {
+  font-family: var(--font-inter);
+}

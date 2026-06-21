@@ -30,7 +30,7 @@ router.post("/generate", requireAuth, requireRole("STUDENT"), aiPromptLimiter, v
     if (!subjectId) {
       let subj = await findSubjectByName(genParams.subject);
       if (!subj) {
-        subj = await createSubject(genParams.subject, "Core", ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"]);
+        subj = await createSubject(genParams.subject, "CORE", ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"]);
       }
       subjectId = subj.id;
     }

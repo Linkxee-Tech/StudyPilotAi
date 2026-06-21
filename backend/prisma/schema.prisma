@@ -73,6 +73,7 @@ enum ExamBoard {
   NABTEB
   GCSE
   SAT
+  BECE
 }
 
 enum PlanItemType {

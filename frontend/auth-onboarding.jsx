@@ -8,7 +8,8 @@ import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');.fd{font-family:'Lexend',system-ui,sans-serif}.fb{font-family:'Inter',system-ui,sans-serif}`;
 
 const GRADES = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"];
-const EXAM_BOARDS = ["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"];
+const JSS_EXAMS = ["BECE"];
+const SS_EXAMS = ["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"];
 const STUDY_TIMES = ["Less than 1 hour", "1–2 hours", "2–3 hours", "3–4 hours", "4+ hours"];
 const CORE_SUBJECTS = ["English Language", "Mathematics", "Biology", "Chemistry", "Physics", "Economics", "Government", "Geography", "Literature in English", "Financial Accounting", "Civic Education", "Agricultural Science", "Computer Science", "History", "Further Mathematics"];
 const JSS_SUBJECTS = ["English Language", "Mathematics", "Basic Science", "Basic Technology", "Business Studies", "Civic Education", "Agricultural Science", "Computer Science", "Home Economics", "Social Studies", "Physical and Health Education", "Christian Religious Studies", "Islamic Religious Studies", "French", "Yoruba", "Igbo", "Hausa"];
@@ -225,12 +226,15 @@ function SubjectsPage({ goTo, signupData, updateData }) {
 }
 
 function ExamPage({ goTo, signupData, updateData }) {
-  const [exams, setExams] = useState(signupData.exams || ["WAEC"]);
+  const isJSS = signupData.grade?.startsWith("JSS");
+  const availableExams = isJSS ? JSS_EXAMS : SS_EXAMS;
+  const initialExams = (signupData.exams || [availableExams[0]]).filter(e => availableExams.includes(e));
+  const [exams, setExams] = useState(initialExams);
   function toggle(e) { setExams(p => p.includes(e) ? p.filter(x => x !== e) : [...p, e]); }
   return (
     <OnboardingShell step={3} total={4} title="Which exams are you preparing for?" subtitle="We will generate past-question style practice and revision plans." onBack={() => goTo("subjects")} onNext={() => { updateData({ exams }); goTo("time"); }} nextDisabled={exams.length === 0}>
       <div className="grid gap-3 sm:grid-cols-2">
-        {EXAM_BOARDS.map((e) => {
+        {availableExams.map((e) => {
           const on = exams.includes(e);
           return (
             <button key={e} type="button" onClick={() => toggle(e)} className={"flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition " + (on ? "border-indigo-400 bg-indigo-50" : "border-stone-200 bg-white hover:border-stone-300")}>

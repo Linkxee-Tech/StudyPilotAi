@@ -30,7 +30,7 @@ const registerSchema = z.object({
       arr.map((e) => (e === "JAMB UTME" ? "JAMB" : e))
     )
     .pipe(
-      z.array(z.enum(["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"]))
+      z.array(z.enum(["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT", "BECE"]))
     )
     .optional(),
   school: z.string().optional(),

@@ -33,7 +33,7 @@ export interface CreateUserInput {
 export async function createUser(input: CreateUserInput): Promise<UserRow> {
   const row = await queryOne<UserRow>(
     `INSERT INTO "User" (email, "passwordHash", "googleId", name, role, "dateOfBirth")
-     VALUES ($1, $2, $3, $4, $5, $6)
+     VALUES ($1, $2, $3, $4, $5::"Role", $6)
      RETURNING *`,
     [input.email, input.passwordHash, input.googleId ?? null, input.name, input.role, input.dateOfBirth ?? null],
   );
@@ -49,7 +49,7 @@ export async function createStudentProfile(
 ): Promise<StudentProfileRow> {
   const row = await queryOne<StudentProfileRow>(
     `INSERT INTO "StudentProfile" ("userId", "gradeLevel", "examBoards", school)
-     VALUES ($1, $2, $3, $4)
+     VALUES ($1, $2::"GradeLevel", $3::"ExamBoard"[], $4)
      RETURNING *`,
     [userId, gradeLevel, examBoards, school],
   );
@@ -103,7 +103,7 @@ export async function registerUserWithProfile(
   return withTransaction(async (client) => {
     const userResult = await client.query<UserRow>(
       `INSERT INTO "User" (email, "passwordHash", "googleId", name, role, "dateOfBirth")
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5::"Role", $6) RETURNING *`,
       [input.email, input.passwordHash, input.googleId ?? null, input.name, input.role, input.dateOfBirth ?? null],
     );
     const user = userResult.rows[0];
@@ -111,7 +111,7 @@ export async function registerUserWithProfile(
     if (input.role === "STUDENT") {
       await client.query(
         `INSERT INTO "StudentProfile" ("userId", "gradeLevel", "examBoards", school)
-         VALUES ($1, $2, $3, $4)`,
+         VALUES ($1, $2::"GradeLevel", $3::"ExamBoard"[], $4)`,
         [user.id, roleProfile?.gradeLevel ?? "SS1", roleProfile?.examBoards ?? [], roleProfile?.school ?? null],
       );
     } else if (input.role === "PARENT") {

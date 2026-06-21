@@ -8,7 +8,7 @@ import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');.fd{font-family:'Lexend',system-ui,sans-serif}.fb{font-family:'Inter',system-ui,sans-serif}`;
 
 const GRADES = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"];
-const EXAM_BOARDS = ["WAEC", "JAMB UTME", "NECO", "NABTEB", "GCSE", "SAT"];
+const EXAM_BOARDS = ["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"];
 const STUDY_TIMES = ["Less than 1 hour", "1–2 hours", "2–3 hours", "3–4 hours", "4+ hours"];
 const CORE_SUBJECTS = ["English Language", "Mathematics", "Biology", "Chemistry", "Physics", "Economics", "Government", "Geography", "Literature in English", "Financial Accounting", "Civic Education", "Agricultural Science", "Computer Science", "History", "Further Mathematics"];
 const ROLES = [
@@ -284,20 +284,24 @@ function CompletePage({ goTo, signupData }) {
   async function handleComplete() {
     setLoading(true); setErr("");
     const roleKey = signupData.role ? signupData.role.toUpperCase() : "STUDENT";
-    const res = await register({
+    // Build payload — only include defined optional fields to avoid Zod errors
+    const payload = {
       email: signupData.email,
       password: signupData.pass,
       name: signupData.name,
       role: roleKey,
-      gradeLevel: signupData.grade,
-      examBoards: signupData.exams,
-      parentEmail: signupData.parentEmail
-    });
+    };
+    if (signupData.grade) payload.gradeLevel = signupData.grade;
+    if (signupData.exams && signupData.exams.length > 0) payload.examBoards = signupData.exams;
+    if (signupData.parentEmail) payload.parentEmail = signupData.parentEmail;
+    const res = await register(payload);
     if (!res.ok) {
       setErr(res.error || "Registration failed.");
       setLoading(false);
     } else {
-      window.location.href = "/student";
+      // Route to correct dashboard based on role
+      const dest = roleKey === "PARENT" ? "/parent" : roleKey === "TEACHER" ? "/teacher" : roleKey === "ADMIN" ? "/admin" : "/student";
+      window.location.href = dest;
     }
   }
 

@@ -23,7 +23,16 @@ const registerSchema = z.object({
   role: z.enum(["STUDENT", "PARENT", "TEACHER", "ADMIN"]),
   dateOfBirth: z.string().datetime().optional().or(z.string().date().optional()),
   gradeLevel: z.enum(["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"]).optional(),
-  examBoards: z.array(z.enum(["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"])).optional(),
+  // Accept both "JAMB" and "JAMB UTME" from older clients — normalize to "JAMB"
+  examBoards: z
+    .array(z.string())
+    .transform((arr) =>
+      arr.map((e) => (e === "JAMB UTME" ? "JAMB" : e))
+    )
+    .pipe(
+      z.array(z.enum(["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"]))
+    )
+    .optional(),
   school: z.string().optional(),
   parentEmail: z.string().email().optional(),
 });

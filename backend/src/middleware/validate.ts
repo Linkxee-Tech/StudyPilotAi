@@ -15,13 +15,19 @@ interface ValidationTargets {
 export function validate(targets: ValidationTargets) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (targets.body) {
-      req.body = targets.body.parse(req.body);
+      const parsed = targets.body.safeParse(req.body);
+      if (!parsed.success) return next(parsed.error);
+      req.body = parsed.data;
     }
     if (targets.query) {
-      req.query = targets.query.parse(req.query) as any;
+      const parsed = targets.query.safeParse(req.query);
+      if (!parsed.success) return next(parsed.error);
+      req.query = parsed.data;
     }
     if (targets.params) {
-      req.params = targets.params.parse(req.params) as any;
+      const parsed = targets.params.safeParse(req.params);
+      if (!parsed.success) return next(parsed.error);
+      req.params = parsed.data;
     }
     next();
   };

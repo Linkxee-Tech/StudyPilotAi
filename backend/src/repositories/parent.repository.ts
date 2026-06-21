@@ -8,9 +8,9 @@ export async function createConsentRequest(studentId: string, parentEmail: strin
   expiresAt.setDate(expiresAt.getDate() + expiryDays);
 
   const row = await queryOne<ParentConsentRow>(
-    `INSERT INTO "ParentConsent" ("studentId", "parentEmail", token, "expiresAt")
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [studentId, parentEmail, token, expiresAt],
+    `INSERT INTO "ParentConsent" (id, "studentId", "parentEmail", token, "expiresAt")
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [crypto.randomUUID(), studentId, parentEmail, token, expiresAt],
   );
   if (!row) throw new Error("Failed to create consent request");
   return row;
@@ -31,9 +31,9 @@ export async function approveConsent(token: string): Promise<ParentConsentRow | 
 
 export async function linkParentToChild(parentId: string, studentId: string): Promise<ParentChildLinkRow> {
   const row = await queryOne<ParentChildLinkRow>(
-    `INSERT INTO "ParentChildLink" ("parentId", "studentId") VALUES ($1, $2)
+    `INSERT INTO "ParentChildLink" (id, "parentId", "studentId") VALUES ($1, $2, $3)
      ON CONFLICT ("parentId", "studentId") DO NOTHING RETURNING *`,
-    [parentId, studentId],
+    [crypto.randomUUID(), parentId, studentId],
   );
   if (!row) throw new Error("This parent is already linked to this student");
   return row;

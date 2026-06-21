@@ -8,8 +8,8 @@ function hashToken(token: string): string {
 
 export async function storeRefreshToken(userId: string, token: string, expiresAt: Date): Promise<void> {
   await query(
-    `INSERT INTO "RefreshToken" ("userId", "tokenHash", "expiresAt") VALUES ($1, $2, $3)`,
-    [userId, hashToken(token), expiresAt],
+    `INSERT INTO "RefreshToken" (id, "userId", "tokenHash", "expiresAt") VALUES ($1, $2, $3, $4)`,
+    [crypto.randomUUID(), userId, hashToken(token), expiresAt],
   );
 }
 

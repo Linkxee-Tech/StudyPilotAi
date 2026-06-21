@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { queryOne, query, withTransaction } from "../lib/db";
 import type {
   UserRow,
@@ -32,10 +33,10 @@ export interface CreateUserInput {
 
 export async function createUser(input: CreateUserInput): Promise<UserRow> {
   const row = await queryOne<UserRow>(
-    `INSERT INTO "User" (email, "passwordHash", "googleId", name, role, "dateOfBirth")
-     VALUES ($1, $2, $3, $4, $5::"Role", $6)
+    `INSERT INTO "User" (id, email, "passwordHash", "googleId", name, role, "dateOfBirth")
+     VALUES ($1, $2, $3, $4, $5, $6::"Role", $7)
      RETURNING *`,
-    [input.email, input.passwordHash, input.googleId ?? null, input.name, input.role, input.dateOfBirth ?? null],
+    [randomUUID(), input.email, input.passwordHash, input.googleId ?? null, input.name, input.role, input.dateOfBirth ?? null],
   );
   if (!row) throw new Error("Failed to create user");
   return row;
@@ -102,9 +103,9 @@ export async function registerUserWithProfile(
 ): Promise<UserRow> {
   return withTransaction(async (client) => {
     const userResult = await client.query<UserRow>(
-      `INSERT INTO "User" (email, "passwordHash", "googleId", name, role, "dateOfBirth")
-       VALUES ($1, $2, $3, $4, $5::"Role", $6) RETURNING *`,
-      [input.email, input.passwordHash, input.googleId ?? null, input.name, input.role, input.dateOfBirth ?? null],
+      `INSERT INTO "User" (id, email, "passwordHash", "googleId", name, role, "dateOfBirth")
+       VALUES ($1, $2, $3, $4, $5, $6::"Role", $7) RETURNING *`,
+      [randomUUID(), input.email, input.passwordHash, input.googleId ?? null, input.name, input.role, input.dateOfBirth ?? null],
     );
     const user = userResult.rows[0];
 

@@ -6,6 +6,7 @@ import {
   Languages, BarChart3, Download, Globe2, CheckCircle2, X, Quote,
   Trophy, Users2,
 } from 'lucide-react';
+import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 
 const fontStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -173,9 +174,7 @@ function Nav() {
     <header className="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-900/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="#top" className="flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400">
-            <Sparkles className="h-5 w-5 text-slate-900" />
-          </div>
+          <StudyPilotLogo size={36} priority />
           <span className="font-display text-lg font-bold text-white">
             StudyPilot <span className="text-amber-400">AI</span>
           </span>
@@ -187,10 +186,10 @@ function Nav() {
           <a href="#pricing" className="transition hover:text-white">Pricing</a>
         </nav>
         <div className="flex items-center gap-3">
-          <button type="button" className="hidden font-body text-sm font-semibold text-slate-300 transition hover:text-white sm:inline-block">
+          <button type="button" onClick={() => window.location.href = '/auth'} className="hidden font-body text-sm font-semibold text-slate-300 transition hover:text-white sm:inline-block">
             Log in
           </button>
-          <button type="button" className="rounded-full bg-amber-400 px-5 py-2.5 font-body text-sm font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
+          <button type="button" onClick={() => window.location.href = '/auth'} className="rounded-full bg-amber-400 px-5 py-2.5 font-body text-sm font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
             Get started free
           </button>
         </div>
@@ -222,10 +221,10 @@ function Hero() {
             StudyPilot explains every topic until it clicks, builds quizzes around your weak spots, and keeps working when your data runs out.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button type="button" className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-400 px-7 py-3.5 font-body text-base font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
+            <button type="button" onClick={() => window.location.href = '/auth'} className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-400 px-7 py-3.5 font-body text-base font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
               Start learning free <ArrowRight className="h-4 w-4" />
             </button>
-            <button type="button" className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-700 px-7 py-3.5 font-body text-base font-semibold text-white transition hover:border-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400">
+            <button type="button" onClick={() => window.location.href = '/auth'} className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-700 px-7 py-3.5 font-body text-base font-semibold text-white transition hover:border-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400">
               For schools & teachers
             </button>
           </div>
@@ -472,6 +471,7 @@ function Pricing() {
               </ul>
               <button
                 type="button"
+                onClick={() => window.location.href = '/auth'}
                 className={`mt-8 w-full rounded-full py-3 font-body text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${tier.highlight ? 'bg-amber-400 text-slate-900 hover:bg-amber-300 focus-visible:outline-amber-200' : 'bg-slate-900 text-white hover:bg-slate-800 focus-visible:outline-slate-400'}`}
               >
                 {tier.cta}
@@ -491,10 +491,10 @@ function FinalCTA() {
         <h2 className="font-display text-3xl font-bold text-slate-900 sm:text-4xl">Ready to start learning?</h2>
         <p className="mt-4 font-body text-lg text-slate-600">It\u2019s free, it works in Pidgin, and it works offline. No card needed.</p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <button type="button" className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-400 px-8 py-3.5 font-body text-base font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
+          <button type="button" onClick={() => window.location.href = '/auth'} className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-400 px-8 py-3.5 font-body text-base font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
             Create my free account <ArrowRight className="h-4 w-4" />
           </button>
-          <button type="button" className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-8 py-3.5 font-body text-base font-semibold text-slate-700 transition hover:border-stone-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
+          <button type="button" onClick={() => window.location.href = '/auth'} className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-8 py-3.5 font-body text-base font-semibold text-slate-700 transition hover:border-stone-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
             <Users2 className="h-4 w-4" /> Set up a classroom
           </button>
         </div>

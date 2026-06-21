@@ -1,5 +1,6 @@
 import React from 'react';
 import './globals.css';
+import { AuthProvider } from '../lib/auth-context';
 
 export const metadata = {
   title: 'StudyPilot AI — Intelligent Personal Tutor & Exam Prep Coach',
@@ -15,9 +16,12 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/logo.png" />
+        <meta name="theme-color" content="#0f172a" />
       </head>
       <body className="antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

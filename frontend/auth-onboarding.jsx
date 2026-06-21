@@ -1,37 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, ChevronRight, ChevronLeft, Check, X, GraduationCap, Users, BookOpen, ShieldCheck, Wifi, WifiOff, AlertCircle, Mail, Lock, User, Building, Clock } from "lucide-react";
+import { Eye, EyeOff, ChevronRight, ChevronLeft, Check, X, GraduationCap, Users, BookOpen, ShieldCheck, Wifi, WifiOff, AlertCircle, Mail, Lock, User, Building, Clock, Loader2 } from "lucide-react";
+import { useAuth } from "../src/lib/auth-context";
+import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');.fd{font-family:'Lexend',system-ui,sans-serif}.fb{font-family:'Inter',system-ui,sans-serif}`;
-
-function OWLogo({ size = 48 }) {
-  return (
-    <svg viewBox="0 0 200 220" width={size} height={size * 1.1} xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 175 Q100 158 170 175 L170 205 Q100 188 30 205 Z" fill="#22c55e" />
-      <path d="M30 188 Q100 172 170 188 L170 205 Q100 188 30 205 Z" fill="#f97316" />
-      <path d="M30 175 Q100 158 170 175" stroke="#3b82f6" strokeWidth="10" fill="none" />
-      <line x1="100" y1="158" x2="100" y2="208" stroke="#0f172a" strokeWidth="6" />
-      <circle cx="100" cy="102" r="76" fill="#0f172a" />
-      <circle cx="100" cy="110" r="60" fill="white" />
-      <polygon points="100,18 42,52 158,52" fill="#0f172a" />
-      <rect x="40" y="47" width="120" height="18" rx="3" fill="#1e293b" />
-      <line x1="158" y1="52" x2="172" y2="80" stroke="#eab308" strokeWidth="5" strokeLinecap="round" />
-      <circle cx="172" cy="86" r="8" fill="#eab308" />
-      <circle cx="68" cy="97" r="27" fill="white" />
-      <circle cx="132" cy="97" r="27" fill="white" />
-      <circle cx="68" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <circle cx="132" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <line x1="95" y1="97" x2="105" y2="97" stroke="#0f172a" strokeWidth="5" />
-      <circle cx="68" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="132" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="62" cy="91" r="5" fill="white" />
-      <circle cx="126" cy="91" r="5" fill="white" />
-      <polygon points="100,124 86,142 114,142" fill="#f97316" />
-      <path d="M76 152 Q100 168 124 152" stroke="#0f172a" strokeWidth="5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 const GRADES = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"];
 const EXAM_BOARDS = ["WAEC", "JAMB UTME", "NECO", "NABTEB", "GCSE", "SAT"];
@@ -74,18 +48,28 @@ function Input({ label, type = "text", value, onChange, placeholder, icon: Icon,
 
 /* STAGES */
 function LoginPage({ goTo }) {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [err, setErr] = useState("");
-  function handleSubmit() {
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
     if (!email || !pass) { setErr("Please fill in all fields."); return; }
-    goTo("complete");
+    setLoading(true); setErr("");
+    const res = await login(email, pass);
+    if (!res.ok) {
+      setErr(res.error || "Login failed.");
+      setLoading(false);
+    } else {
+      window.location.href = "/student"; // Redirect on success
+    }
   }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <div className="flex justify-center mb-4"><OWLogo size={64} /></div>
+          <div className="flex justify-center mb-4"><StudyPilotLogo size={64} priority /></div>
           <h1 className="fd text-2xl font-bold text-slate-900">Welcome back</h1>
           <p className="mt-1 fb text-sm text-slate-500">Sign in to your StudyPilot AI account</p>
         </div>
@@ -93,10 +77,13 @@ function LoginPage({ goTo }) {
           {err && <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 fb text-sm text-rose-700 flex items-center gap-2"><AlertCircle className="h-4 w-4 flex-none" />{err}</div>}
           <Input label="Email address" type="email" value={email} onChange={e => { setEmail(e.target.value); setErr(""); }} placeholder="you@example.com" icon={Mail} />
           <Input label="Password" type="password" value={pass} onChange={e => { setPass(e.target.value); setErr(""); }} placeholder="Enter your password" icon={Lock} />
-          <div className="flex justify-end"><button type="button" className="fb text-xs font-semibold text-emerald-600 hover:text-emerald-700">Forgot password?</button></div>
-          <Btn onClick={handleSubmit} className="w-full">Sign in <ChevronRight className="h-4 w-4" /></Btn>
+          <div className="flex justify-end"><button type="button" onClick={() => goTo("forgot")} className="fb text-xs font-semibold text-emerald-600 hover:text-emerald-700">Forgot password?</button></div>
+          <Btn onClick={handleSubmit} disabled={loading} className="w-full">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+            {!loading && <ChevronRight className="h-4 w-4" />}
+          </Btn>
           <div className="relative flex items-center gap-3"><div className="flex-1 h-px bg-stone-200" /><span className="fb text-xs text-slate-400">or</span><div className="flex-1 h-px bg-stone-200" /></div>
-          <Btn variant="google" className="w-full">
+          <Btn variant="google" onClick={() => window.location.href = "/api/auth/google"} className="w-full">
             <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
             Continue with Google
           </Btn>
@@ -108,8 +95,8 @@ function LoginPage({ goTo }) {
   );
 }
 
-function SignupPage({ goTo }) {
-  const [form, setForm] = useState({ name: "", email: "", pass: "", confirm: "" });
+function SignupPage({ goTo, signupData, updateData }) {
+  const [form, setForm] = useState({ name: signupData.name || "", email: signupData.email || "", pass: signupData.pass || "", confirm: signupData.confirm || "" });
   const [err, setErr] = useState({});
   function handleSubmit() {
     const e = {};
@@ -118,13 +105,14 @@ function SignupPage({ goTo }) {
     if (form.pass.length < 8) e.pass = "Password must be at least 8 characters.";
     if (form.pass !== form.confirm) e.confirm = "Passwords do not match.";
     if (Object.keys(e).length) { setErr(e); return; }
+    updateData({ name: form.name, email: form.email, pass: form.pass, confirm: form.confirm });
     goTo("role");
   }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <div className="flex justify-center mb-4"><OWLogo size={64} /></div>
+          <div className="flex justify-center mb-4"><StudyPilotLogo size={64} priority /></div>
           <h1 className="fd text-2xl font-bold text-slate-900">Create your account</h1>
           <p className="mt-1 fb text-sm text-slate-500">Free forever. No card required.</p>
         </div>
@@ -144,13 +132,13 @@ function SignupPage({ goTo }) {
   );
 }
 
-function RolePage({ goTo }) {
-  const [role, setRole] = useState(null);
+function RolePage({ goTo, signupData, updateData }) {
+  const [role, setRole] = useState(signupData.role || null);
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center">
-          <div className="flex justify-center mb-4"><OWLogo size={56} /></div>
+          <div className="flex justify-center mb-4"><StudyPilotLogo size={56} priority /></div>
           <h1 className="fd text-2xl font-bold text-slate-900">I am a...</h1>
           <p className="mt-1 fb text-sm text-slate-500">Choose your role to personalise your experience</p>
         </div>
@@ -166,7 +154,7 @@ function RolePage({ goTo }) {
             </button>
           ))}
         </div>
-        <Btn onClick={() => { if (role === "student") goTo("grade"); else if (role) goTo("complete"); }} disabled={!role} className="w-full">
+        <Btn onClick={() => { updateData({ role }); if (role === "student") goTo("grade"); else if (role) goTo("complete"); }} disabled={!role} className="w-full">
           Continue <ChevronRight className="h-4 w-4" />
         </Btn>
       </div>
@@ -180,7 +168,7 @@ function OnboardingShell({ step, total, title, subtitle, children, onNext, onBac
       <div className="w-full max-w-lg space-y-6">
         <div>
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2"><OWLogo size={32} /><span className="fd text-sm font-bold text-slate-900">StudyPilot <span className="text-amber-500">AI</span></span></div>
+            <div className="flex items-center gap-2"><StudyPilotLogo size={32} /><span className="fd text-sm font-bold text-slate-900">StudyPilot <span className="text-amber-500">AI</span></span></div>
             <span className="fb text-xs text-slate-400">Step {step} of {total}</span>
           </div>
           <div className="h-2 w-full rounded-full bg-stone-200"><div className="h-2 rounded-full bg-emerald-500 transition-all" style={{ width: ((step / total) * 100) + "%" }} /></div>
@@ -196,10 +184,10 @@ function OnboardingShell({ step, total, title, subtitle, children, onNext, onBac
   );
 }
 
-function GradePage({ goTo }) {
-  const [grade, setGrade] = useState(null);
+function GradePage({ goTo, signupData, updateData }) {
+  const [grade, setGrade] = useState(signupData.grade || null);
   return (
-    <OnboardingShell step={1} total={4} title="What class are you in?" subtitle="We will personalise your subjects and exam prep." onBack={() => goTo("role")} onNext={() => goTo("subjects")} nextDisabled={!grade}>
+    <OnboardingShell step={1} total={4} title="What class are you in?" subtitle="We will personalise your subjects and exam prep." onBack={() => goTo("role")} onNext={() => { updateData({ grade }); goTo("subjects"); }} nextDisabled={!grade}>
       <div className="grid grid-cols-3 gap-3">
         {GRADES.map((g) => (
           <button key={g} type="button" onClick={() => setGrade(g)} className={"rounded-xl border-2 py-4 fd text-base font-bold transition " + (grade === g ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-stone-200 bg-white text-slate-700 hover:border-stone-300")}>{g}</button>
@@ -209,11 +197,11 @@ function GradePage({ goTo }) {
   );
 }
 
-function SubjectsPage({ goTo }) {
-  const [subs, setSubs] = useState(["Mathematics", "English Language", "Biology"]);
+function SubjectsPage({ goTo, signupData, updateData }) {
+  const [subs, setSubs] = useState(signupData.subs || ["Mathematics", "English Language", "Biology"]);
   function toggle(s) { setSubs(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]); }
   return (
-    <OnboardingShell step={2} total={4} title="Which subjects are you studying?" subtitle={"Select all that apply. You can change this later."} onBack={() => goTo("grade")} onNext={() => goTo("exam")} nextDisabled={subs.length === 0}>
+    <OnboardingShell step={2} total={4} title="Which subjects are you studying?" subtitle={"Select all that apply. You can change this later."} onBack={() => goTo("grade")} onNext={() => { updateData({ subs }); goTo("exam"); }} nextDisabled={subs.length === 0}>
       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
         {CORE_SUBJECTS.map((s) => {
           const on = subs.includes(s);
@@ -230,11 +218,11 @@ function SubjectsPage({ goTo }) {
   );
 }
 
-function ExamPage({ goTo }) {
-  const [exams, setExams] = useState(["WAEC"]);
+function ExamPage({ goTo, signupData, updateData }) {
+  const [exams, setExams] = useState(signupData.exams || ["WAEC"]);
   function toggle(e) { setExams(p => p.includes(e) ? p.filter(x => x !== e) : [...p, e]); }
   return (
-    <OnboardingShell step={3} total={4} title="Which exams are you preparing for?" subtitle="We will generate past-question style practice and revision plans." onBack={() => goTo("subjects")} onNext={() => goTo("time")} nextDisabled={exams.length === 0}>
+    <OnboardingShell step={3} total={4} title="Which exams are you preparing for?" subtitle="We will generate past-question style practice and revision plans." onBack={() => goTo("subjects")} onNext={() => { updateData({ exams }); goTo("time"); }} nextDisabled={exams.length === 0}>
       <div className="grid gap-3 sm:grid-cols-2">
         {EXAM_BOARDS.map((e) => {
           const on = exams.includes(e);
@@ -250,10 +238,10 @@ function ExamPage({ goTo }) {
   );
 }
 
-function TimePage({ goTo }) {
-  const [time, setTime] = useState("1–2 hours");
+function TimePage({ goTo, signupData, updateData }) {
+  const [time, setTime] = useState(signupData.time || "1–2 hours");
   return (
-    <OnboardingShell step={4} total={4} title="How long can you study each day?" subtitle="We will build a personalised daily study schedule for you." onBack={() => goTo("exam")} onNext={() => goTo("consent")} nextLabel="Finish setup">
+    <OnboardingShell step={4} total={4} title="How long can you study each day?" subtitle="We will build a personalised daily study schedule for you." onBack={() => goTo("exam")} onNext={() => { updateData({ time }); goTo("consent"); }} nextLabel="Finish setup">
       <div className="space-y-2">
         {STUDY_TIMES.map((t) => (
           <button key={t} type="button" onClick={() => setTime(t)} className={"flex w-full items-center justify-between rounded-xl border-2 px-4 py-3 transition " + (time === t ? "border-emerald-400 bg-emerald-50" : "border-stone-200 bg-white hover:border-stone-300")}>
@@ -266,13 +254,13 @@ function TimePage({ goTo }) {
   );
 }
 
-function ConsentPage({ goTo }) {
-  const [parentEmail, setParentEmail] = useState("");
+function ConsentPage({ goTo, signupData, updateData }) {
+  const [parentEmail, setParentEmail] = useState(signupData.parentEmail || "");
   const [agreed, setAgreed] = useState(false);
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center"><div className="flex justify-center mb-4"><OWLogo size={56} /></div><h1 className="fd text-2xl font-bold text-slate-900">Parent / Guardian consent</h1><p className="mt-1 fb text-sm text-slate-500">Because you are under 13, we need a parent or guardian to approve your account.</p></div>
+        <div className="text-center"><div className="flex justify-center mb-4"><StudyPilotLogo size={56} priority /></div><h1 className="fd text-2xl font-bold text-slate-900">Parent / Guardian consent</h1><p className="mt-1 fb text-sm text-slate-500">Because you are under 13, we need a parent or guardian to approve your account.</p></div>
         <Card className="p-6 space-y-4">
           <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 fb text-sm text-amber-800">StudyPilot AI protects children's privacy (COPPA & GDPR-aligned). We will email your parent for approval before activating your account.</div>
           <Input label="Parent / Guardian email" type="email" value={parentEmail} onChange={e => setParentEmail(e.target.value)} placeholder="parent@example.com" icon={Mail} hint="We will send an approval link to this address." />
@@ -280,7 +268,7 @@ function ConsentPage({ goTo }) {
             <button type="button" onClick={() => setAgreed(v => !v)} className={"flex h-5 w-5 flex-none items-center justify-center rounded-md border-2 mt-0.5 " + (agreed ? "border-emerald-500 bg-emerald-500" : "border-stone-300")}>{agreed && <Check className="h-3 w-3 text-white" />}</button>
             <p className="fb text-sm text-slate-600">I confirm that I have permission from my parent or guardian to create this account.</p>
           </div>
-          <Btn onClick={() => goTo("complete")} disabled={!parentEmail || !agreed} className="w-full">Send approval request <ChevronRight className="h-4 w-4" /></Btn>
+          <Btn onClick={() => { updateData({ parentEmail }); goTo("complete"); }} disabled={!parentEmail || !agreed} className="w-full">Send approval request <ChevronRight className="h-4 w-4" /></Btn>
           <button type="button" onClick={() => goTo("complete")} className="w-full text-center fb text-sm text-slate-400 hover:text-slate-600">I am 13 or older — skip this step</button>
         </Card>
       </div>
@@ -288,11 +276,35 @@ function ConsentPage({ goTo }) {
   );
 }
 
-function CompletePage({ goTo }) {
+function CompletePage({ goTo, signupData }) {
+  const { register } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function handleComplete() {
+    setLoading(true); setErr("");
+    const roleKey = signupData.role ? signupData.role.toUpperCase() : "STUDENT";
+    const res = await register({
+      email: signupData.email,
+      password: signupData.pass,
+      name: signupData.name,
+      role: roleKey,
+      gradeLevel: signupData.grade,
+      examBoards: signupData.exams,
+      parentEmail: signupData.parentEmail
+    });
+    if (!res.ok) {
+      setErr(res.error || "Registration failed.");
+      setLoading(false);
+    } else {
+      window.location.href = "/student";
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-md space-y-6 text-center">
-        <div className="flex justify-center mb-4"><OWLogo size={80} /></div>
+        <div className="flex justify-center mb-4"><StudyPilotLogo size={80} priority /></div>
         <div className="space-y-2">
           <div className="flex justify-center"><div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100"><Check className="h-8 w-8 text-emerald-600" /></div></div>
           <h1 className="fd text-2xl font-bold text-slate-900">You are all set!</h1>
@@ -304,7 +316,11 @@ function CompletePage({ goTo }) {
               <div key={s.label}><p className="fd text-2xl font-bold text-slate-900">{s.val}</p><p className="fb text-xs text-slate-500">{s.label}</p></div>
             ))}
           </div>
-          <Btn className="w-full" onClick={() => goTo("login")}>Go to my dashboard <ChevronRight className="h-4 w-4" /></Btn>
+          {err && <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 fb text-sm text-rose-700 flex items-center gap-2"><AlertCircle className="h-4 w-4 flex-none" />{err}</div>}
+          <Btn className="w-full" disabled={loading} onClick={handleComplete}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Go to my dashboard"} 
+            {!loading && <ChevronRight className="h-4 w-4" />}
+          </Btn>
           <p className="fb text-xs text-slate-400">Download offline packs on your first session for uninterrupted learning</p>
         </Card>
         <div className="flex items-center justify-center gap-2 fb text-xs text-slate-400"><Wifi className="h-3.5 w-3.5 text-emerald-500" />Works offline · <span className="text-amber-600 font-semibold">Pidgin mode</span> available · WCAG 2.1 AA</div>
@@ -319,7 +335,7 @@ function ForgotPasswordPage({ goTo }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center"><div className="flex justify-center mb-4"><OWLogo size={56} /></div><h1 className="fd text-2xl font-bold text-slate-900">{sent ? "Check your email" : "Reset your password"}</h1><p className="mt-1 fb text-sm text-slate-500">{sent ? "We sent a reset link to " + email : "Enter your account email and we will send you a reset link."}</p></div>
+        <div className="text-center"><div className="flex justify-center mb-4"><StudyPilotLogo size={56} priority /></div><h1 className="fd text-2xl font-bold text-slate-900">{sent ? "Check your email" : "Reset your password"}</h1><p className="mt-1 fb text-sm text-slate-500">{sent ? "We sent a reset link to " + email : "Enter your account email and we will send you a reset link."}</p></div>
         {!sent ? (
           <Card className="p-6 space-y-4">
             <Input label="Email address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" icon={Mail} />
@@ -341,19 +357,22 @@ function ForgotPasswordPage({ goTo }) {
 /* ROOT */
 export default function StudyPilotAuth() {
   const [stage, setStage] = useState("login");
+  const [signupData, setSignupData] = useState({});
   const goTo = (s) => setStage(s);
+  const updateData = (d) => setSignupData(p => ({ ...p, ...d }));
+
   return (
     <div className="fb">
       <style>{FONTS}</style>
       {stage === "login" && <LoginPage goTo={goTo} />}
-      {stage === "signup" && <SignupPage goTo={goTo} />}
-      {stage === "role" && <RolePage goTo={goTo} />}
-      {stage === "grade" && <GradePage goTo={goTo} />}
-      {stage === "subjects" && <SubjectsPage goTo={goTo} />}
-      {stage === "exam" && <ExamPage goTo={goTo} />}
-      {stage === "time" && <TimePage goTo={goTo} />}
-      {stage === "consent" && <ConsentPage goTo={goTo} />}
-      {stage === "complete" && <CompletePage goTo={goTo} />}
+      {stage === "signup" && <SignupPage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "role" && <RolePage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "grade" && <GradePage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "subjects" && <SubjectsPage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "exam" && <ExamPage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "time" && <TimePage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "consent" && <ConsentPage goTo={goTo} signupData={signupData} updateData={updateData} />}
+      {stage === "complete" && <CompletePage goTo={goTo} signupData={signupData} />}
       {stage === "forgot" && <ForgotPasswordPage goTo={goTo} />}
     </div>
   );

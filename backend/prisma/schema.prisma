@@ -1,0 +1,564 @@
+// StudyPilot AI — Prisma schema
+// Database: PostgreSQL
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+enum Role {
+  STUDENT
+  PARENT
+  TEACHER
+  ADMIN
+}
+
+enum GradeLevel {
+  JSS1
+  JSS2
+  JSS3
+  SS1
+  SS2
+  SS3
+}
+
+enum SubjectCategory {
+  CORE
+  SCIENCES
+  ARTS_HUMANITIES
+  COMMERCIAL
+  TRADE_VOCATIONAL
+}
+
+enum ExplanationMode {
+  BEGINNER
+  STANDARD
+  ADVANCED
+  PIDGIN
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  FILL_BLANK
+  SHORT_ANSWER
+  MATCHING
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuizMode {
+  PRACTICE
+  MOCK_EXAM
+  WEAK_AREAS
+  SPEED_ROUND
+}
+
+enum ExamBoard {
+  WAEC
+  JAMB
+  NECO
+  NABTEB
+  GCSE
+  SAT
+}
+
+enum PlanItemType {
+  LESSON
+  QUIZ
+  REVISION
+  PRACTICE
+  MOCK_EXAM
+  REVIEW
+}
+
+enum PackType {
+  SUBJECT
+  EXAM
+  TOPIC
+}
+
+enum ResourceType {
+  NOTES
+  FLASHCARDS
+  CHEATSHEET
+  MINDMAP
+  QUESTIONS
+}
+
+enum ResourceFormat {
+  PDF
+  DOCX
+  INLINE
+}
+
+enum ConsentStatus {
+  PENDING
+  APPROVED
+  EXPIRED
+}
+
+enum ModerationAction {
+  AUTO_FILTERED
+  FLAGGED
+  BLOCKED
+  APPROVED
+  REMOVED
+}
+
+enum CacheType {
+  TUTOR_EXPLANATION
+  STEP_LESSON
+  QUIZ_GEN
+  HOMEWORK_HINT
+  RESOURCE_GEN
+  STUDY_PLAN
+}
+
+// ───────────────────────── Core identity ─────────────────────────
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String? // null for Google-OAuth-only accounts
+  googleId        String?   @unique
+  name            String
+  role            Role
+  dateOfBirth     DateTime?
+  retainAnswers   Boolean   @default(false) // opt-in to keep answers beyond 30 days
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  studentProfile  StudentProfile?
+  parentProfile   ParentProfile?
+  teacherProfile  TeacherProfile?
+
+  refreshTokens   RefreshToken[]
+  notifications   Notification[]
+
+  // parent <-> child relations
+  childLinksAsParent  ParentChildLink[] @relation("ParentLinks")
+  childLinksAsStudent ParentChildLink[] @relation("StudentLinks")
+
+  consentRequestsAsStudent ParentConsent[] @relation("ConsentStudent")
+
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model ParentConsent {
+  id          String        @id @default(uuid())
+  studentId   String
+  student     User          @relation("ConsentStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  parentEmail String
+  token       String        @unique
+  status      ConsentStatus @default(PENDING)
+  requestedAt DateTime      @default(now())
+  approvedAt  DateTime?
+  expiresAt   DateTime
+
+  @@index([studentId])
+}
+
+model ParentChildLink {
+  id        String   @id @default(uuid())
+  parentId  String
+  parent    User     @relation("ParentLinks", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User     @relation("StudentLinks", fields: [studentId], references: [id], onDelete: Cascade)
+  linkedAt  DateTime @default(now())
+
+  @@unique([parentId, studentId])
+}
+
+// ───────────────────────── Role profiles ─────────────────────────
+
+model StudentProfile {
+  userId               String     @id
+  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gradeLevel           GradeLevel
+  school               String?
+  examBoards           ExamBoard[]
+  dailyStudyMinutesGoal Int       @default(60)
+  xp                   Int        @default(0)
+  streakCount          Int        @default(0)
+  lastStudyDate        DateTime?
+  defaultExplanationMode ExplanationMode @default(STANDARD)
+  lowBandwidthMode     Boolean    @default(false)
+  voiceEnabled         Boolean    @default(true)
+
+  subjects             StudentSubject[]
+  classroomMemberships ClassroomMembership[]
+  quizzes              Quiz[]
+  homeworkSessions     HomeworkSession[]
+  studyPlanEntries     StudyPlanEntry[]
+  examCountdowns       ExamCountdown[]
+  achievements         StudentAchievement[]
+  offlineDownloads     StudentOfflineDownload[]
+  resourceGenerations  ResourceGeneration[]
+}
+
+model ParentProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dailySummaryEmail  Boolean @default(true)
+  weeklyReportEmail  Boolean @default(true)
+  weakAreaAlerts     Boolean @default(true)
+}
+
+model TeacherProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school String?
+
+  classrooms Classroom[]
+}
+
+// ───────────────────────── Classrooms ─────────────────────────
+
+model Classroom {
+  id         String     @id @default(uuid())
+  teacherId  String
+  teacher    TeacherProfile @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  name       String
+  joinCode   String     @unique
+  gradeLevel GradeLevel
+  createdAt  DateTime   @default(now())
+
+  memberships ClassroomMembership[]
+  goals       LearningGoal[]
+}
+
+model ClassroomMembership {
+  id          String         @id @default(uuid())
+  classroomId String
+  classroom   Classroom      @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  joinedAt    DateTime       @default(now())
+
+  @@unique([classroomId, studentId])
+}
+
+model LearningGoal {
+  id           String    @id @default(uuid())
+  classroomId  String
+  classroom    Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  title        String
+  subjectId    String?
+  subject      Subject?  @relation(fields: [subjectId], references: [id])
+  targetScore  Int?
+  dueDate      DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+// ───────────────────────── Curriculum ─────────────────────────
+
+model Subject {
+  id         String          @id @default(uuid())
+  name       String          @unique
+  category   SubjectCategory
+  levels     GradeLevel[]
+  topicCount Int             @default(0)
+
+  topics              Topic[]
+  studentSubjects     StudentSubject[]
+  quizQuestions       QuizQuestion[]
+  quizzes             Quiz[]
+  homeworkSessions    HomeworkSession[]
+  studyPlanEntries    StudyPlanEntry[]
+  offlinePacks        OfflinePack[]
+  resourceGenerations ResourceGeneration[]
+  learningGoals       LearningGoal[]
+
+  @@index([category])
+}
+
+model StudentSubject {
+  id        String         @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  subjectId String
+  subject   Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  addedAt   DateTime       @default(now())
+
+  @@unique([studentId, subjectId])
+}
+
+model Topic {
+  id         String     @id @default(uuid())
+  subjectId  String
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title      String
+  level      GradeLevel
+  difficulty Difficulty @default(MEDIUM)
+  order      Int        @default(0)
+
+  quizQuestions QuizQuestion[]
+  quizzes       Quiz[]
+
+  @@index([subjectId])
+}
+
+// ───────────────────────── AI response cache ─────────────────────────
+// Generic cache for Gemini responses to reduce repeat-prompt cost (per spec: "prompt caching")
+
+model AIResponseCache {
+  id          String    @id @default(uuid())
+  cacheKey    String    @unique
+  type        CacheType
+  requestJson Json
+  responseJson Json
+  modelUsed   String
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+
+  @@index([type])
+  @@index([expiresAt])
+}
+
+// ───────────────────────── Quiz engine ─────────────────────────
+
+model QuizQuestion {
+  id             String       @id @default(uuid())
+  subjectId      String
+  subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topicId        String?
+  topic          Topic?       @relation(fields: [topicId], references: [id])
+  type           QuestionType
+  questionText   String
+  options        Json // string[] for MCQ/TF/matching; null for short answer
+  correctAnswer  Json // index, string, or matching map depending on type
+  explanation    String
+  difficulty     Difficulty   @default(MEDIUM)
+  examBoard      ExamBoard?
+  aiGenerated    Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+
+  attempts QuizAttemptAnswer[]
+
+  @@index([subjectId])
+  @@index([topicId])
+}
+
+model Quiz {
+  id            String         @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  subjectId     String
+  subject       Subject        @relation(fields: [subjectId], references: [id])
+  topicId       String?
+  topic         Topic?         @relation(fields: [topicId], references: [id])
+  mode          QuizMode
+  startedAt     DateTime       @default(now())
+  completedAt   DateTime?
+  totalQuestions Int
+  score         Int? // percentage, set on completion
+  xpEarned      Int            @default(0)
+
+  answers QuizAttemptAnswer[]
+
+  @@index([studentId])
+  @@index([subjectId])
+}
+
+model QuizAttemptAnswer {
+  id               String       @id @default(uuid())
+  quizId           String
+  quiz             Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         QuizQuestion @relation(fields: [questionId], references: [id])
+  studentAnswer    Json
+  isCorrect        Boolean
+  timeTakenSeconds Int?
+  answeredAt       DateTime     @default(now())
+
+  @@index([quizId])
+}
+
+// ───────────────────────── Homework assistant ─────────────────────────
+// Subject to 30-day retention purge unless User.retainAnswers = true
+
+model HomeworkSession {
+  id           String         @id @default(uuid())
+  studentId    String
+  student      StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  subjectId    String?
+  subject      Subject?       @relation(fields: [subjectId], references: [id])
+  questionText String
+  imageUrl     String?
+  hintsGiven   Int            @default(0)
+  resolved     Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+
+  @@index([studentId])
+  @@index([createdAt])
+}
+
+// ───────────────────────── Study planner ─────────────────────────
+
+model StudyPlanEntry {
+  id              String         @id @default(uuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  date            DateTime
+  subjectId       String?
+  subject         Subject?       @relation(fields: [subjectId], references: [id])
+  topicTitle      String
+  type            PlanItemType
+  durationMinutes Int
+  completed       Boolean        @default(false)
+  generatedByAI   Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+
+  @@index([studentId, date])
+}
+
+model ExamCountdown {
+  id        String         @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  examBoard ExamBoard
+  examDate  DateTime
+  subjects  String[]
+  createdAt DateTime       @default(now())
+
+  @@index([studentId])
+}
+
+// ───────────────────────── Gamification ─────────────────────────
+
+model Achievement {
+  id          String @id @default(uuid())
+  key         String @unique
+  label       String
+  description String
+  iconKey     String
+
+  studentAchievements StudentAchievement[]
+}
+
+model StudentAchievement {
+  id            String         @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement    @relation(fields: [achievementId], references: [id])
+  earnedAt      DateTime       @default(now())
+
+  @@unique([studentId, achievementId])
+}
+
+// ───────────────────────── Offline packs ─────────────────────────
+
+model OfflinePack {
+  id        String    @id @default(uuid())
+  key       String    @unique
+  name      String
+  type      PackType
+  subjectId String?
+  subject   Subject?  @relation(fields: [subjectId], references: [id])
+  examBoard ExamBoard?
+  sizeMB    Float
+  version   Int       @default(1)
+  createdAt DateTime  @default(now())
+
+  downloads StudentOfflineDownload[]
+}
+
+model StudentOfflineDownload {
+  id             String         @id @default(uuid())
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  packId         String
+  pack           OfflinePack    @relation(fields: [packId], references: [id], onDelete: Cascade)
+  downloadedAt   DateTime       @default(now())
+  downloadedVersion Int
+  lastSyncedAt   DateTime       @default(now())
+
+  @@unique([studentId, packId])
+}
+
+// ───────────────────────── Offline sync log (idempotency) ─────────────────────────
+
+model SyncLogEntry {
+  id              String   @id @default(uuid())
+  studentId       String
+  clientActionId  String // idempotency key generated offline by the client
+  actionType      String
+  payload         Json
+  appliedAt       DateTime @default(now())
+  success         Boolean
+
+  @@unique([studentId, clientActionId])
+}
+
+// ───────────────────────── Resource generator ─────────────────────────
+
+model ResourceGeneration {
+  id           String         @id @default(uuid())
+  studentId    String
+  student      StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  subjectId    String?
+  subject      Subject?       @relation(fields: [subjectId], references: [id])
+  topic        String
+  resourceType ResourceType
+  contentJson  Json
+  format       ResourceFormat @default(INLINE)
+  createdAt    DateTime       @default(now())
+
+  @@index([studentId])
+}
+
+// ───────────────────────── Notifications & moderation ─────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+model ModerationFlag {
+  id          String            @id @default(uuid())
+  contentType String
+  contentRef  String?
+  studentId   String?
+  reason      String
+  action      ModerationAction
+  createdAt   DateTime          @default(now())
+  reviewedBy  String?
+  reviewedAt  DateTime?
+
+  @@index([action])
+}

@@ -1,38 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Home, MessageCircle, BookOpen, ListChecks, BarChart3, CalendarDays, Settings, Flame, Star, Trophy, ChevronRight, ChevronDown, ChevronLeft, Mic, Send, Volume2, CheckCircle2, Circle, Bell, Brain, Lightbulb, AlertTriangle, ListOrdered, RotateCcw, Wifi, WifiOff, Download, Award, RefreshCw, Search, FlaskConical, Palette, Briefcase, Wrench, GraduationCap, Timer, X, Clock, Target, Zap, FileText, StickyNote, Plus, HardDrive, LogOut, Shield, FileDown, RotateCw, Layers, Image as ImageIcon } from "lucide-react";
+import { Home, MessageCircle, BookOpen, ListChecks, BarChart3, CalendarDays, Settings, Flame, Star, Trophy, ChevronRight, ChevronDown, ChevronLeft, Mic, Send, Volume2, CheckCircle2, Circle, Bell, Brain, Lightbulb, AlertTriangle, ListOrdered, RotateCcw, Wifi, WifiOff, Download, Award, RefreshCw, Search, FlaskConical, Palette, Briefcase, Wrench, GraduationCap, Timer, X, Clock, Target, Zap, FileText, StickyNote, Plus, HardDrive, LogOut, Shield, FileDown, RotateCw, Layers, Image as ImageIcon, CreditCard, Loader2 } from "lucide-react";
+import { useAuth } from "../src/lib/auth-context";
+import { apiClient, quizApi } from "../src/lib/api";
+import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');.fd{font-family:'Lexend',system-ui,sans-serif}.fb{font-family:'Inter',system-ui,sans-serif}`;
-
-function OWLogo({ size = 38 }) {
-  return (
-    <svg viewBox="0 0 200 220" width={size} height={size * 1.1} xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 175 Q100 158 170 175 L170 205 Q100 188 30 205 Z" fill="#22c55e" />
-      <path d="M30 188 Q100 172 170 188 L170 205 Q100 188 30 205 Z" fill="#f97316" />
-      <path d="M30 175 Q100 158 170 175" stroke="#3b82f6" strokeWidth="10" fill="none" />
-      <line x1="100" y1="158" x2="100" y2="208" stroke="#0f172a" strokeWidth="6" />
-      <circle cx="100" cy="102" r="76" fill="#0f172a" />
-      <circle cx="100" cy="110" r="60" fill="white" />
-      <polygon points="100,18 42,52 158,52" fill="#0f172a" />
-      <rect x="40" y="47" width="120" height="18" rx="3" fill="#1e293b" />
-      <line x1="158" y1="52" x2="172" y2="80" stroke="#eab308" strokeWidth="5" strokeLinecap="round" />
-      <circle cx="172" cy="86" r="8" fill="#eab308" />
-      <circle cx="68" cy="97" r="27" fill="white" />
-      <circle cx="132" cy="97" r="27" fill="white" />
-      <circle cx="68" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <circle cx="132" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <line x1="95" y1="97" x2="105" y2="97" stroke="#0f172a" strokeWidth="5" />
-      <circle cx="68" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="132" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="62" cy="91" r="5" fill="white" />
-      <circle cx="126" cy="91" r="5" fill="white" />
-      <polygon points="100,124 86,142 114,142" fill="#f97316" />
-      <path d="M76 152 Q100 168 124 152" stroke="#0f172a" strokeWidth="5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 const NAV = [
   { key: "dashboard", label: "Dashboard", icon: Home },
@@ -151,7 +126,7 @@ function Sidebar({ active, setActive }) {
   return (
     <aside className="hidden w-64 flex-none flex-col bg-slate-900 lg:flex min-h-screen">
       <div className="flex items-center gap-3 px-5 py-5">
-        <OWLogo size={38} />
+        <StudyPilotLogo size={38} priority />
         <div><p className="fd text-base font-bold text-white leading-tight">StudyPilot</p><p className="fb text-xs text-amber-400 font-semibold">AI Tutor Platform</p></div>
       </div>
       <nav className="flex-1 space-y-0.5 px-3">
@@ -185,7 +160,7 @@ function Topbar({ online, setOnline, title }) {
   return (
     <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-2 lg:hidden"><OWLogo size={30} /><p className="fd text-sm font-bold text-slate-900">StudyPilot <span className="text-amber-500">AI</span></p></div>
+        <div className="flex items-center gap-2 lg:hidden"><StudyPilotLogo size={30} /><p className="fd text-sm font-bold text-slate-900">StudyPilot <span className="text-amber-500">AI</span></p></div>
         <div className="hidden lg:block"><p className="fb text-xs text-slate-400">Good afternoon, Tunde</p><h1 className="fd text-lg font-bold text-slate-900">{title}</h1></div>
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => setOnline((v) => !v)} className={"flex items-center gap-1.5 rounded-full px-3 py-2 fb text-xs font-semibold transition " + (online ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
@@ -299,17 +274,80 @@ function Dashboard({ setActive }) {
 
 /* ─ AI TUTOR ─ */
 function TutorChat({ setActive }) {
+  const { user } = useAuth();
   const [depth, setDepth] = useState("standard");
   const [open, setOpen] = useState(["intro"]);
   const [listening, setListening] = useState(false);
   const [hint, setHint] = useState(0);
+  const [question, setQuestion] = useState("Why do plants need sunlight to make food?");
+  const [answer, setAnswer] = useState("");
+  const [sending, setSending] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+  const fileInputRef = useRef(null);
   const tog = (k) => setOpen((p) => p.includes(k) ? p.filter((x) => x !== k) : [...p, k]);
+  const mapDepthToMode = () => {
+    if (depth === "beginner") return "BEGINNER";
+    if (depth === "advanced") return "ADVANCED";
+    if (depth === "pidgin") return "PIDGIN";
+    return "STANDARD";
+  };
+  const speakLesson = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      alert("Voice playback is not available in this browser.");
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(EXPS[depth]);
+    utterance.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
+  const triggerImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSelectedImage(file.name);
+  };
+  const sendQuestion = async () => {
+    const trimmed = question.trim();
+    if (!trimmed) {
+      setAnswer("Please type a question first.");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await apiClient.post("/tutor/explain", {
+        topic: trimmed,
+        subject: "Biology",
+        gradeLevel: user?.gradeLevel || "SS2",
+        mode: mapDepthToMode(),
+      });
+      if (res.success && res.data) {
+        const concepts = Array.isArray(res.data.keyConcepts) ? res.data.keyConcepts.join(" • ") : "";
+        const examples = Array.isArray(res.data.examples) ? res.data.examples.join(" | ") : "";
+        setAnswer([
+          res.data.definition,
+          concepts,
+          examples,
+          res.data.analogy,
+          res.data.summary,
+        ].filter(Boolean).join("\n\n"));
+      } else {
+        setAnswer(typeof res.error === "string" ? res.error : res.error?.message || "Unable to get a tutor response right now.");
+      }
+    } catch (err) {
+      setAnswer(err?.message || "Unable to get a tutor response right now.");
+    } finally {
+      setSending(false);
+    }
+  };
   return (
     <div className="space-y-6 p-4 pb-44 sm:p-6">
       <div className="rounded-2xl border border-stone-200 bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400">Biology · SS2</p><h2 className="fd text-lg font-bold text-slate-900">Photosynthesis</h2></div>
-          <button type="button" className="flex items-center gap-1.5 rounded-full border border-stone-200 px-3 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50"><Volume2 className="h-3.5 w-3.5" />Listen</button>
+          <button type="button" onClick={speakLesson} className="flex items-center gap-1.5 rounded-full border border-stone-200 px-3 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50"><Volume2 className="h-3.5 w-3.5" />Listen</button>
         </div>
         <div className="mt-4 grid grid-cols-4 gap-1 rounded-full bg-stone-100 p-1">
           {DEPTHS.map((d) => (
@@ -338,6 +376,11 @@ function TutorChat({ setActive }) {
       </section>
       <section className="space-y-4">
         <h2 className="fd text-base font-bold text-slate-900">Ask the tutor</h2>
+        {answer && (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 fb text-sm text-slate-700 whitespace-pre-line">
+            {answer}
+          </div>
+        )}
         <div className="flex gap-3"><div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-emerald-100"><Brain className="h-4 w-4 text-emerald-600" /></div><div className="max-w-[85%] rounded-2xl border border-stone-200 bg-white px-4 py-3 fb text-sm text-slate-700">Hi Tunde! Ready to continue with Photosynthesis? Ask anything or try a quick action below.</div></div>
         <div className="flex flex-row-reverse gap-3"><div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-slate-200 fd text-xs font-bold text-slate-600">T</div><div className="max-w-[85%] rounded-2xl bg-slate-900 px-4 py-3 fb text-sm text-white">A plant in a dark cupboard turns pale after 3 days. Why?</div></div>
         <div className="flex gap-3">
@@ -347,7 +390,7 @@ function TutorChat({ setActive }) {
             <p className="mt-1">{HINTS[Math.min(hint, HINTS.length - 1)]}</p>
             {hint < HINTS.length && <button type="button" onClick={() => setHint((h) => h + 1)} className="mt-3 rounded-full bg-stone-100 px-3 py-1.5 fb text-xs font-semibold text-slate-700 hover:bg-stone-200">{hint >= HINTS.length - 1 ? "Show full answer" : "Next hint"}</button>}
             {hint >= HINTS.length && <div className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 fb text-xs text-emerald-700">Without light, the plant cannot photosynthesise, so it cannot produce chlorophyll (causing paleness) or glucose for energy.</div>}
-            <button type="button" className="mt-3 rounded-full border border-stone-200 px-3 py-1.5 fb text-xs font-semibold text-slate-600">Generate a similar question</button>
+            <button type="button" onClick={() => { setQuestion("Why do plants need sunlight to make food?"); setAnswer(""); setHint(0); }} className="mt-3 rounded-full border border-stone-200 px-3 py-1.5 fb text-xs font-semibold text-slate-600">Generate a similar question</button>
           </div>
         </div>
       </section>
@@ -358,10 +401,14 @@ function TutorChat({ setActive }) {
           ))}
         </div>
         <div className="mx-auto max-w-3xl flex items-center gap-2">
-          <button type="button" aria-label="Upload image" className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-stone-200 text-slate-500 hover:bg-stone-50"><ImageIcon className="h-5 w-5" /></button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+          <button type="button" aria-label="Upload image" onClick={triggerImageUpload} className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-stone-200 text-slate-500 hover:bg-stone-50"><ImageIcon className="h-5 w-5" /></button>
           <button type="button" onClick={() => setListening((v) => !v)} aria-label="Voice input" className={"flex h-11 w-11 flex-none items-center justify-center rounded-full border transition " + (listening ? "border-rose-300 bg-rose-50 text-rose-500" : "border-stone-200 text-slate-500 hover:bg-stone-50")}><Mic className="h-5 w-5" /></button>
-          <input type="text" placeholder={listening ? "Listening..." : "Ask about Photosynthesis..."} className="h-11 flex-1 rounded-full border border-stone-200 px-4 fb text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <button type="button" aria-label="Send" className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800"><Send className="h-4 w-4" /></button>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <input type="text" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={listening ? "Listening..." : "Ask about Photosynthesis..."} className="h-11 min-w-0 flex-1 rounded-full border border-stone-200 px-4 fb text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            {selectedImage && <p className="px-4 fb text-[11px] text-slate-500">Image queued: {selectedImage}</p>}
+          </div>
+          <button type="button" aria-label="Send" onClick={sendQuestion} disabled={sending} className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60"><Send className="h-4 w-4" /></button>
         </div>
       </div>
     </div>
@@ -460,31 +507,134 @@ function StudyLibrary() {
 }
 
 /* ─ QUIZ CENTER ─ */
+/* ─ QUIZ CENTER ─ */
 function QuizCenter() {
-  const [stage, setStage] = useState("home");
+  const { user } = useAuth();
+  const [stage, setStage] = useState("home"); // home, loading, playing, results
   const [qi, setQi] = useState(0);
   const [sel, setSel] = useState(null);
   const [ans, setAns] = useState(false);
-  const [all, setAll] = useState([]);
+  const [all, setAll] = useState([]); // stores boolean correct/incorrect
   const [tl, setTl] = useState(30);
   const [fill, setFill] = useState("");
-  const q = QUIZ_QS[qi];
-  const score = all.filter((a, i) => a === QUIZ_QS[i].ans).length;
+  const [quizId, setQuizId] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [finalScore, setFinalScore] = useState(null);
+
+  const q = questions[qi] || {};
+  const score = all.filter((a) => a).length;
+
   useEffect(() => {
     if (stage !== "playing" || ans) return;
-    const id = setInterval(() => setTl((t) => { if (t <= 1) { setAns(true); setAll((p) => [...p, -1]); return 0; } return t - 1; }), 1000);
+    const id = setInterval(() => setTl((t) => { if (t <= 1) { handleTimeout(); return 0; } return t - 1; }), 1000);
     return () => clearInterval(id);
   }, [stage, ans, qi]);
-  function pick(i) { if (ans) return; setSel(i); setAns(true); setAll((p) => [...p, i]); }
-  function next() { if (qi < QUIZ_QS.length - 1) { setQi((i) => i + 1); setSel(null); setAns(false); setFill(""); setTl(30); } else setStage("results"); }
-  function restart() { setStage("home"); setQi(0); setSel(null); setAns(false); setAll([]); setTl(30); setFill(""); }
+
+  async function handleTimeout() {
+    setAns(true);
+    setAll((p) => [...p, false]);
+    if (quizId && q.id) {
+      await quizApi.answer(quizId, q.id, null, 30).catch(() => {});
+    }
+  }
+
+  async function pick(i) { 
+    if (ans) return; 
+    setSel(i); 
+    setAns(true); 
+    
+    let isCorrect = false;
+    if (q.type === "FILL_BLANK") {
+      isCorrect = i.toString().toLowerCase().trim() === (q.correctAnswer || "").toString().toLowerCase().trim();
+    } else {
+      isCorrect = i === q.correctAnswer;
+    }
+    setAll((p) => [...p, isCorrect]); 
+
+    if (quizId && q.id) {
+      await quizApi.answer(quizId, q.id, i, 30 - tl).catch(() => {});
+    }
+  }
+
+  async function next() { 
+    if (qi < questions.length - 1) { 
+      setQi((i) => i + 1); 
+      setSel(null); 
+      setAns(false); 
+      setFill(""); 
+      setTl(30); 
+    } else {
+      setStage("results");
+      if (quizId) {
+        const res = await quizApi.finish(quizId).catch(() => null);
+        if (res && res.success) {
+          setFinalScore(res.data);
+        }
+      }
+    } 
+  }
+
+  function restart() { setStage("home"); setQi(0); setSel(null); setAns(false); setAll([]); setTl(30); setFill(""); setQuizId(null); setQuestions([]); setFinalScore(null); }
+
+  async function startQuiz(modeStr) {
+    setLoading(true);
+    setStage("loading");
+    setQuestions([]);
+    setQi(0);
+    setSel(null);
+    setAns(false);
+    setAll([]);
+    setTl(30);
+    setFill("");
+
+    const reqData = {
+      subject: "Biology",
+      topic: "Photosynthesis",
+      gradeLevel: user?.gradeLevel || "SS2",
+      questionTypes: ["MCQ", "TRUE_FALSE", "FILL_BLANK"],
+      count: 5,
+      difficulty: "MEDIUM",
+      mode: "PRACTICE"
+    };
+
+    if (modeStr === "Subject Mock Exam") {
+      reqData.mode = "MOCK_EXAM";
+      reqData.count = 30;
+      reqData.questionTypes = ["MCQ"];
+    } else if (modeStr === "Weak Areas Drill") {
+      reqData.mode = "WEAK_AREAS";
+    } else if (modeStr === "Speed Round") {
+      reqData.mode = "SPEED_ROUND";
+      reqData.count = 10;
+    }
+
+    try {
+      const res = await quizApi.generate(reqData);
+      if (res.success && res.data) {
+        setQuizId(res.data.quizId);
+        setQuestions(res.data.questions);
+        setStage("playing");
+      } else {
+        setStage("home");
+      }
+    } catch (e) {
+      setStage("home");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (stage === "home") return (
-    <div className="p-4 pb-28 space-y-6 sm:p-6">
-      <div className="rounded-2xl border border-stone-200 bg-white p-5">
-        <h2 className="fd text-lg font-bold text-slate-900">Quick start</h2>
+    <div className="p-4 pb-28 space-y-6 sm:p-6 max-w-4xl mx-auto">
+      <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2 text-indigo-600 mb-4">
+          <ListChecks className="h-5 w-5" />
+          <h2 className="fd text-lg font-bold text-slate-900">Quick start</h2>
+        </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {[{ l: "Topic Quiz", d: "Practice a specific topic with adaptive questions", b: "Recommended" }, { l: "Subject Mock Exam", d: "Full mock — 30 questions, timed", b: "WAEC style" }, { l: "Weak Areas Drill", d: "AI-selected questions on your weakest topics", b: "AI pick" }, { l: "Speed Round", d: "10 questions, 15 seconds each", b: "Challenge" }].map((qt) => (
-            <button key={qt.l} type="button" onClick={() => setStage("playing")} className="rounded-xl border border-stone-200 p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50/30">
+            <button key={qt.l} type="button" onClick={() => startQuiz(qt.l)} className="rounded-xl border border-stone-200 p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50/30">
               <div className="flex items-center justify-between"><h3 className="fd text-sm font-bold text-slate-900">{qt.l}</h3><Bdg ch={qt.b} cls="bg-indigo-100 text-indigo-700" /></div>
               <p className="mt-1 fb text-xs text-slate-500">{qt.d}</p>
             </button>
@@ -495,7 +645,7 @@ function QuizCenter() {
         <h2 className="fd text-lg font-bold text-slate-900">Recent performance</h2>
         <div className="mt-3 space-y-2">
           {[{ sub: "Biology", t: "Photosynthesis", s: 80, d: "Today" }, { sub: "Mathematics", t: "Quadratic Equations", s: 70, d: "Yesterday" }, { sub: "Chemistry", t: "Periodic Table", s: 60, d: "Jun 10" }].map((r) => (
-            <div key={r.t} className="flex items-center gap-4 rounded-xl border border-stone-200 bg-white px-4 py-3">
+            <div key={r.t} className="flex items-center gap-4 rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-sm">
               <div className="min-w-0 flex-1"><p className="fb text-sm font-semibold text-slate-800">{r.sub} — {r.t}</p><p className="fb text-xs text-slate-400">{r.d}</p></div>
               <div className={"fd text-lg font-bold " + (r.s >= 70 ? "text-emerald-600" : r.s >= 50 ? "text-amber-600" : "text-rose-600")}>{r.s}%</div>
             </div>
@@ -504,69 +654,89 @@ function QuizCenter() {
       </div>
     </div>
   );
+
+  if (stage === "loading") return (
+    <div className="flex flex-col items-center justify-center p-12 text-slate-500">
+      <Loader2 className="h-8 w-8 animate-spin mb-4" />
+      <p className="fb text-sm font-semibold text-slate-700">Generating your personalised quiz...</p>
+    </div>
+  );
+
   if (stage === "results") {
-    const pct = Math.round((score / QUIZ_QS.length) * 100);
+    const pct = questions.length ? Math.round((score / questions.length) * 100) : 0;
     return (
-      <div className="p-4 pb-28 space-y-6 sm:p-6">
-        <div className="rounded-2xl bg-slate-900 p-8 text-center text-white">
+      <div className="p-4 pb-28 space-y-6 sm:p-6 max-w-4xl mx-auto">
+        <div className="rounded-2xl bg-slate-900 p-8 text-center text-white shadow-md">
           <p className="fb text-sm text-slate-400">Biology — Photosynthesis Quiz</p>
           <p className={"mt-4 fd text-6xl font-bold " + (pct >= 70 ? "text-emerald-400" : pct >= 50 ? "text-amber-400" : "text-rose-400")}>{pct}%</p>
-          <p className="mt-2 fd text-xl font-bold">{score} / {QUIZ_QS.length} correct</p>
+          <p className="mt-2 fd text-xl font-bold">{score} / {questions.length} correct</p>
           <p className="mt-1 fb text-sm text-slate-400">{pct >= 70 ? "Great work! You are on track." : "Keep practising — you are improving!"}</p>
-          <div className="mt-4 flex justify-center"><Bdg ch={<><Star className="h-3.5 w-3.5" />+{pct >= 70 ? 40 : 20} XP earned</>} cls="bg-amber-400/20 text-amber-300" /></div>
+          <div className="mt-4 flex justify-center"><Bdg ch={<><Star className="h-3.5 w-3.5" />+{finalScore?.xpAwarded || (pct >= 70 ? 40 : 20)} XP earned</>} cls="bg-amber-400/20 text-amber-300" /></div>
         </div>
         <div className="space-y-2">
-          {QUIZ_QS.map((qq, i) => {
-            const ok = all[i] === qq.ans;
+          {questions.map((qq, i) => {
+            const ok = all[i];
+            const correctOpt = qq.type === "FILL_BLANK" ? qq.correctAnswer : (qq.options && qq.options[qq.correctAnswer]);
             return (
-              <div key={i} className={"rounded-xl border p-4 " + (ok ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50")}>
+              <div key={i} className={"rounded-xl border p-4 shadow-sm " + (ok ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50")}>
                 <div className="flex items-start gap-2">
                   {ok ? <CheckCircle2 className="h-5 w-5 flex-none text-emerald-500 mt-0.5" /> : <X className="h-5 w-5 flex-none text-rose-500 mt-0.5" />}
-                  <div><p className="fb text-sm font-medium text-slate-800">{qq.q}</p><p className="mt-1 fb text-xs text-slate-600"><span className="font-semibold">Correct: </span>{qq.opts[qq.ans]}</p><p className="mt-1 fb text-xs text-slate-500">{qq.exp}</p></div>
+                  <div>
+                    <p className="fb text-sm font-medium text-slate-800">{qq.questionText}</p>
+                    <p className="mt-1 fb text-xs text-slate-600"><span className="font-semibold">Correct: </span>{correctOpt}</p>
+                    <p className="mt-1 fb text-xs text-slate-500">{qq.explanation}</p>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
         <div className="flex gap-3">
-          <button type="button" onClick={restart} className="flex-1 rounded-full bg-slate-900 py-3 fb text-sm font-semibold text-white hover:bg-slate-800">Try again</button>
-          <button type="button" className="flex-1 rounded-full border border-stone-200 py-3 fb text-sm font-semibold text-slate-700 hover:bg-stone-50">Study weak topics</button>
+          <button type="button" onClick={restart} className="flex-1 rounded-full bg-slate-900 py-3 fb text-sm font-semibold text-white hover:bg-slate-800 transition">Try again</button>
+          <button type="button" className="flex-1 rounded-full border border-stone-200 py-3 fb text-sm font-semibold text-slate-700 hover:bg-stone-50 transition">Study weak topics</button>
         </div>
       </div>
     );
   }
-  const prog = (qi / QUIZ_QS.length) * 100;
-  const isOk = sel === q.ans;
+
+  const prog = questions.length ? (qi / questions.length) * 100 : 0;
+  const isOk = all[qi];
+
   return (
-    <div className="p-4 pb-28 space-y-5 sm:p-6">
+    <div className="p-4 pb-28 space-y-5 sm:p-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-3">
-        <button type="button" onClick={restart} className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-slate-500 hover:bg-stone-50"><ChevronLeft className="h-4 w-4" /></button>
+        <button type="button" onClick={restart} className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-slate-500 hover:bg-stone-50 transition"><ChevronLeft className="h-4 w-4" /></button>
         <div className="flex-1"><div className="h-2 w-full rounded-full bg-stone-100"><div className="h-2 rounded-full bg-emerald-500 transition-all" style={{ width: prog + "%" }} /></div></div>
-        <span className="fb text-sm font-semibold text-slate-600">{qi + 1}/{QUIZ_QS.length}</span>
+        <span className="fb text-sm font-semibold text-slate-600">{qi + 1}/{questions.length}</span>
         <div className={"flex items-center gap-1 rounded-full px-3 py-1.5 fb text-xs font-semibold " + (tl <= 10 ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700")}><Timer className="h-3.5 w-3.5" />{tl}s</div>
       </div>
-      <Bdg ch={q.type === "mcq" ? "Multiple Choice" : q.type === "tf" ? "True / False" : "Fill in the Blank"} cls="bg-indigo-100 text-indigo-700" />
-      <div className="rounded-2xl border border-stone-200 bg-white p-6"><p className="fd text-base font-bold text-slate-900 leading-snug">{q.q}</p></div>
-      {q.type === "fill" ? (
+      <Bdg ch={q.type === "MCQ" ? "Multiple Choice" : q.type === "TRUE_FALSE" ? "True / False" : "Fill in the Blank"} cls="bg-indigo-100 text-indigo-700" />
+      <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"><p className="fd text-base font-bold text-slate-900 leading-snug">{q.questionText}</p></div>
+      
+      {q.type === "FILL_BLANK" ? (
         <div className="space-y-3">
-          <input type="text" value={fill} onChange={(e) => setFill(e.target.value)} placeholder="Type your answer..." className="w-full rounded-xl border border-stone-200 px-4 py-3 fb text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          {!ans && <button type="button" onClick={() => pick(fill.toLowerCase().includes("chlorophyll") ? 0 : 3)} className="w-full rounded-full bg-slate-900 py-3 fb text-sm font-semibold text-white hover:bg-slate-800">Check answer</button>}
+          <input type="text" value={fill} onChange={(e) => setFill(e.target.value)} placeholder="Type your answer..." className="w-full rounded-xl border border-stone-200 px-4 py-3 fb text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" disabled={ans} />
+          {!ans && <button type="button" onClick={() => pick(fill)} className="w-full rounded-full bg-slate-900 py-3 fb text-sm font-semibold text-white hover:bg-slate-800 transition">Check answer</button>}
         </div>
       ) : (
         <div className="space-y-2">
-          {q.opts.map((opt, i) => {
+          {(q.options || []).map((opt, i) => {
             let sty = "border-stone-200 bg-white text-slate-700 hover:border-slate-300";
-            if (ans) { if (i === q.ans) sty = "border-emerald-400 bg-emerald-50 text-emerald-800"; else if (i === sel && !isOk) sty = "border-rose-400 bg-rose-50 text-rose-800"; else sty = "border-stone-100 bg-stone-50 text-slate-400 opacity-50"; }
+            if (ans) { 
+              if (i === q.correctAnswer) sty = "border-emerald-400 bg-emerald-50 text-emerald-800"; 
+              else if (i === sel && !isOk) sty = "border-rose-400 bg-rose-50 text-rose-800"; 
+              else sty = "border-stone-100 bg-stone-50 text-slate-400 opacity-50"; 
+            }
             return (
               <button key={opt} type="button" onClick={() => pick(i)} disabled={ans} className={"flex w-full items-center gap-3 rounded-xl border p-4 text-left fb text-sm font-medium transition " + sty}>
-                <span className={"flex h-7 w-7 flex-none items-center justify-center rounded-full border text-xs font-bold " + (ans && i === q.ans ? "border-emerald-500 bg-emerald-500 text-white" : ans && i === sel ? "border-rose-500 bg-rose-500 text-white" : "border-stone-300")}>{String.fromCharCode(65 + i)}</span>{opt}
+                <span className={"flex h-7 w-7 flex-none items-center justify-center rounded-full border text-xs font-bold " + (ans && i === q.correctAnswer ? "border-emerald-500 bg-emerald-500 text-white" : ans && i === sel ? "border-rose-500 bg-rose-500 text-white" : "border-stone-300")}>{String.fromCharCode(65 + i)}</span>{opt}
               </button>
             );
           })}
         </div>
       )}
-      {ans && <div className={"rounded-xl p-4 " + (isOk ? "bg-emerald-50 border border-emerald-200" : "bg-rose-50 border border-rose-200")}><p className={"fb text-sm font-semibold " + (isOk ? "text-emerald-700" : "text-rose-700")}>{isOk ? "Correct!" : "Not quite."}</p><p className="mt-1 fb text-sm text-slate-600">{q.exp}</p></div>}
-      {ans && <button type="button" onClick={next} className="w-full rounded-full bg-slate-900 py-3 fb text-sm font-semibold text-white hover:bg-slate-800">{qi < QUIZ_QS.length - 1 ? "Next question" : "See results"}</button>}
+      {ans && <div className={"rounded-xl p-4 " + (isOk ? "bg-emerald-50 border border-emerald-200" : "bg-rose-50 border border-rose-200")}><p className={"fb text-sm font-semibold " + (isOk ? "text-emerald-700" : "text-rose-700")}>{isOk ? "Correct!" : "Not quite."}</p><p className="mt-1 fb text-sm text-slate-600">{q.explanation}</p></div>}
+      {ans && <button type="button" onClick={next} className="w-full rounded-full bg-slate-900 py-3 fb text-sm font-semibold text-white hover:bg-slate-800 transition">{qi < questions.length - 1 ? "Next question" : "See results"}</button>}
     </div>
   );
 }
@@ -794,58 +964,82 @@ function ResourceGenerator() {
 
 /* HOMEWORK ASSISTANT */
 function HomeworkAssistant() {
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
-  const [hintIndex, setHintIndex] = useState(0);
+  const [error, setError] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
+  const [hintLoading, setHintLoading] = useState(false);
+  const [hints, setHints] = useState([]);
+  const [isFinalStage, setIsFinalStage] = useState(false);
+  const [practiceQuestion, setPracticeQuestion] = useState(null);
   const [userAnswer, setUserAnswer] = useState("");
   const [answerResult, setAnswerResult] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
     setLoading(true);
-    setResponse(null);
-    setHintIndex(0);
+    setError(null);
+    setSessionId(null);
+    setHints([]);
+    setIsFinalStage(false);
+    setPracticeQuestion(null);
     setUserAnswer("");
     setAnswerResult(null);
-    
-    setTimeout(() => {
-      setLoading(false);
-      setResponse({
-        concept: "Law of Conservation of Mass",
-        conceptExplanation: "The total mass of reactants in a chemical reaction must equal the total mass of the products. Mass can neither be created nor destroyed.",
-        hints: [
-          "Count the number of Carbon (C) atoms on both sides of the equation.",
-          "Check how many Oxygen (O) atoms are in one molecule of CO2 versus O2.",
-          "Balance the equations by matching the ratio of Carbon to Oxygen atoms."
-        ],
-        workedExample: {
-          problem: "Balance: H2 + O2 -> H2O",
-          steps: [
-            "Reactants side: 2 Hydrogen atoms, 2 Oxygen atoms.",
-            "Products side: 2 Hydrogen atoms, 1 Oxygen atom.",
-            "Multiply H2O by 2 to balance Oxygen: H2 + O2 -> 2H2O (4 H, 2 O)",
-            "Multiply H2 by 2 to balance Hydrogen: 2H2 + O2 -> 2H2O (4 H, 2 O - Balanced!)"
-          ]
-        },
-        followUp: {
-          question: "If 12g of Carbon reacts completely with 32g of Oxygen, what will be the total mass of Carbon Dioxide (CO2) produced?",
-          choices: ["22g", "44g", "32g", "12g"],
-          correctAnswer: 1,
-          explanation: "According to the Law of Conservation of Mass: Reactant Mass (12g Carbon + 32g Oxygen) = Product Mass (CO2). Therefore, 12 + 32 = 44g."
-        }
+
+    try {
+      const res = await apiClient.post("/homework/start", {
+        questionText: query.trim(),
       });
-    }, 1500);
+      if (res.success && res.data) {
+        setSessionId(res.data.id);
+        // Immediately get the first hint
+        await getHint(res.data.id);
+      } else {
+        setError(typeof res.error === "string" ? res.error : res.error?.message || "Could not start homework session. Please try again.");
+      }
+    } catch (err) {
+      setError(err?.message || "Could not start homework session. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVerifyAnswer = () => {
-    if (userAnswer === "") return;
-    const isCorrect = parseInt(userAnswer) === response.followUp.correctAnswer;
-    setAnswerResult({
-      correct: isCorrect,
-      explanation: response.followUp.explanation
-    });
+  const getHint = async (sid) => {
+    const id = sid || sessionId;
+    if (!id) return;
+    setHintLoading(true);
+    try {
+      const res = await apiClient.post("/homework/hint", {
+        sessionId: id,
+        gradeLevel: user?.gradeLevel || "SS2",
+      });
+      if (res.success && res.data) {
+        setHints((prev) => [...prev, res.data.hint]);
+        setIsFinalStage(res.data.isFinalStage);
+        if (res.data.similarPracticeQuestion) {
+          setPracticeQuestion(res.data.similarPracticeQuestion);
+        }
+      } else {
+        setHints((prev) => [...prev, "The AI tutor is temporarily unavailable. Please check your class notes for hints."]);
+      }
+    } catch (err) {
+      setHints((prev) => [...prev, "Could not get hint — please try again."]);
+    } finally {
+      setHintLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setQuery("");
+    setSessionId(null);
+    setHints([]);
+    setIsFinalStage(false);
+    setPracticeQuestion(null);
+    setUserAnswer("");
+    setAnswerResult(null);
+    setError(null);
   };
 
   return (
@@ -856,29 +1050,43 @@ function HomeworkAssistant() {
           <h2 className="fd text-lg font-bold text-slate-900">AI Homework Assistant</h2>
         </div>
         <p className="fb text-sm text-slate-500">
-          Paste a difficult question, specify your homework problem, or upload a query. The AI will explain the concepts and give you hints to solve it, keeping the focus on real learning!
+          Paste a difficult question or homework problem below. The AI will guide you with progressive hints to help you understand — not just copy answers!
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type or paste your homework question here... (e.g., How do I balance the chemical equation C + O2 -> CO2?)"
+            placeholder="Type or paste your homework question here... (e.g., How do I balance the chemical equation C + O2 → CO2?)"
             className="w-full h-32 rounded-xl border border-stone-200 p-4 fb text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition resize-none"
+            disabled={loading}
           />
           <div className="flex items-center justify-between">
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-full border border-stone-200 px-4 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50"
-            >
-              <ImageIcon className="h-4 w-4" />
-              Upload Image
-            </button>
+            {sessionId && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="flex items-center gap-2 rounded-full border border-stone-200 px-4 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                New question
+              </button>
+            )}
+            {!sessionId && (
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-full border border-stone-200 px-4 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50 opacity-50"
+                disabled
+              >
+                <ImageIcon className="h-4 w-4" />
+                Upload Image
+              </button>
+            )}
             <button
               type="submit"
-              disabled={loading || !query.trim()}
+              disabled={loading || !query.trim() || !!sessionId}
               className="rounded-full bg-slate-900 px-6 py-2.5 fb text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
             >
-              {loading ? "Analyzing concept..." : "Get Concept & Hints"}
+              {loading ? "Getting hints..." : "Get AI Hints"}
             </button>
           </div>
         </form>
@@ -891,106 +1099,88 @@ function HomeworkAssistant() {
         </div>
       )}
 
-      {response && (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 space-y-3">
-            <div className="flex items-center gap-2 text-indigo-700">
-              <Brain className="h-5 w-5" />
-              <h3 className="fd text-base font-bold">Concept: {response.concept}</h3>
-            </div>
-            <p className="fb text-sm leading-relaxed text-slate-700">{response.conceptExplanation}</p>
-          </div>
-
-          <div className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="fd text-base font-bold text-slate-900">Step-by-Step Hints</h3>
-              <span className="fb text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-0.5 rounded-full">
-                Hint {hintIndex + 1} of {response.hints.length}
-              </span>
-            </div>
-            <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
-              <p className="fb text-sm text-slate-700 leading-relaxed italic">
-                "{response.hints[hintIndex]}"
-              </p>
-            </div>
-            <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={() => setHintIndex((i) => Math.max(0, i - 1))}
-                disabled={hintIndex === 0}
-                className="fb text-xs font-bold text-emerald-600 disabled:opacity-40"
-              >
-                Previous Hint
-              </button>
-              <button
-                type="button"
-                onClick={() => setHintIndex((i) => Math.min(response.hints.length - 1, i + 1))}
-                disabled={hintIndex === response.hints.length - 1}
-                className="fb text-xs font-bold text-emerald-600 disabled:opacity-40"
-              >
-                Next Hint
-              </button>
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 flex-none text-rose-500 mt-0.5" />
+            <div>
+              <p className="fb text-sm font-semibold text-rose-700">Could not process your question</p>
+              <p className="fb text-xs text-rose-600 mt-1">{error}</p>
             </div>
           </div>
+        </div>
+      )}
 
-          <div className="rounded-2xl border border-stone-200 bg-white p-5 space-y-3">
-            <h3 className="fd text-base font-bold text-slate-900">Worked Example of Similar Problem</h3>
-            <div className="rounded-xl border border-dashed border-stone-200 p-4 bg-stone-50/50">
-              <p className="fb text-sm font-semibold text-slate-800 mb-2">{response.workedExample.problem}</p>
-              <ul className="space-y-1.5">
-                {response.workedExample.steps.map((s, idx) => (
-                  <li key={idx} className="fb text-xs text-slate-600 flex items-start gap-1.5">
-                    <span className="text-emerald-500 font-bold">•</span>
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {hints.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-indigo-600" />
+            <h3 className="fd text-base font-bold text-slate-900">Your question</h3>
+          </div>
+          <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
+            <p className="fb text-sm text-slate-700 leading-relaxed">{query}</p>
           </div>
 
-          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/35 p-5 space-y-4">
-            <h3 className="fd text-base font-bold text-slate-900">Check Your Understanding</h3>
-            <p className="fb text-sm text-slate-700 leading-relaxed">{response.followUp.question}</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {response.followUp.choices.map((c, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setUserAnswer(idx.toString());
-                    setAnswerResult(null);
-                  }}
-                  className={`text-left p-3.5 rounded-xl border fb text-sm transition ${
-                    userAnswer === idx.toString()
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold"
-                      : "border-stone-200 bg-white text-slate-700 hover:bg-stone-50"
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleVerifyAnswer}
-                disabled={userAnswer === ""}
-                className="rounded-full bg-emerald-600 px-6 py-2 fb text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-              >
-                Submit Answer
-              </button>
-            </div>
-            {answerResult && (
-              <div className={`p-4 rounded-xl border ${
-                answerResult.correct ? "bg-emerald-100 border-emerald-200 text-emerald-800" : "bg-rose-100 border-rose-200 text-rose-800"
-              }`}>
-                <p className="fb text-sm font-semibold mb-1">
-                  {answerResult.correct ? "Excellent! Correct." : "Incorrect. Try looking over the hints again!"}
-                </p>
-                <p className="fb text-xs leading-relaxed opacity-90">{answerResult.explanation}</p>
+          <div className="space-y-3">
+            {hints.map((hint, i) => (
+              <div key={i} className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white fd text-xs font-bold">{i + 1}</span>
+                  <span className="fb text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                    {i === 0 ? "First hint" : i === 1 ? "Second hint" : "Final guidance"}
+                  </span>
+                </div>
+                <p className="fb text-sm leading-relaxed text-slate-700">{hint}</p>
               </div>
-            )}
+            ))}
           </div>
+
+          {practiceQuestion && (
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/35 p-5 space-y-3">
+              <div className="flex items-center gap-2 text-emerald-700">
+                <Lightbulb className="h-5 w-5" />
+                <h3 className="fd text-sm font-bold">Practice a similar question</h3>
+              </div>
+              <p className="fb text-sm text-slate-700 leading-relaxed">{practiceQuestion}</p>
+            </div>
+          )}
+
+          {!isFinalStage && !hintLoading && (
+            <button
+              type="button"
+              onClick={() => getHint()}
+              disabled={hintLoading}
+              className="w-full rounded-full border border-indigo-300 bg-indigo-50 py-3 fb text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition"
+            >
+              {hints.length === 1 ? "I need another hint" : "Give me one more hint"}
+            </button>
+          )}
+
+          {hintLoading && (
+            <div className="flex items-center justify-center gap-2 py-4 text-slate-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="fb text-sm">Getting next hint...</span>
+            </div>
+          )}
+
+          {isFinalStage && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 space-y-3">
+              <div className="flex items-center gap-2 text-amber-700">
+                <Trophy className="h-5 w-5" />
+                <h3 className="fd text-sm font-bold">You've seen all the guidance!</h3>
+              </div>
+              <p className="fb text-sm text-slate-600">
+                Now try to solve it using the hints above. Understanding the process is more valuable than knowing the answer. You can do it!
+              </p>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="rounded-full bg-slate-900 px-6 py-2.5 fb text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Try another question
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1329,6 +1519,36 @@ function SettingsPage() {
   const [notifs, setNotifs] = useState({ daily: true, streak: true, parent: false, weekly: true });
   const [acc, setAcc] = useState({ large: false, contrast: false });
   const [retain, setRetain] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
+  const { user, logout } = useAuth();
+
+  async function handleUpgrade() {
+    setPayLoading(true);
+    try {
+      const res = await apiClient.post("/payment/initialize", {
+        plan: "pro",
+        email: user?.email || "student@example.com",
+      });
+      if (res.success && res.data?.authorizationUrl) {
+        window.location.href = res.data.authorizationUrl;
+      } else {
+        alert("Failed to initialize payment");
+        setPayLoading(false);
+      }
+    } catch (err) {
+      alert("Error starting payment");
+      setPayLoading(false);
+    }
+  }
+  const clearDownloads = () => {
+    localStorage.removeItem("sp_downloads");
+    localStorage.removeItem("sp_offline_downloads");
+    setStatusMsg("Downloaded packs cleared from this device.");
+  };
+  const deleteAccount = () => {
+    window.location.href = "mailto:Linkxeetech@gmail.com?subject=Delete%20my%20StudyPilot%20account";
+  };
   return (
     <div className="p-4 pb-28 space-y-6 sm:p-6">
       <section className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
@@ -1338,11 +1558,25 @@ function SettingsPage() {
           <button type="button" className="fb text-sm font-semibold text-emerald-600 hover:text-emerald-700">Change photo</button>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {[{ label: "Full name", val: "Tunde Adekunle" }, { label: "Email address", val: "tunde@example.com" }, { label: "School", val: "Birnin Kebbi High School" }, { label: "Class level", val: "SS2" }].map((f) => (
+          {[{ label: "Full name", val: user?.name || "Tunde Adekunle" }, { label: "Email address", val: user?.email || "tunde@example.com" }, { label: "School", val: "Birnin Kebbi High School" }, { label: "Class level", val: user?.gradeLevel || "SS2" }].map((f) => (
             <div key={f.label}><label className="fb text-xs font-semibold uppercase tracking-wide text-slate-500">{f.label}</label><input type="text" defaultValue={f.val} className="mt-1 h-10 w-full rounded-xl border border-stone-200 px-3 fb text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500" /></div>
           ))}
         </div>
         <button type="button" className="rounded-full bg-slate-900 px-6 py-2.5 fb text-sm font-semibold text-white hover:bg-slate-800">Save changes</button>
+      </section>
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
+        <div className="flex items-center gap-2"><CreditCard className="h-4 w-4 text-slate-500" /><h2 className="fd text-base font-bold text-slate-900">Subscription</h2></div>
+        <div className="flex items-center justify-between rounded-xl border border-stone-200 p-4">
+          <div>
+            <p className="fb text-sm font-semibold text-slate-800">Current Plan</p>
+            <p className="fb text-xs text-slate-500 capitalize">{user?.plan || "Free"} Plan</p>
+          </div>
+          {(user?.plan === "free" || !user?.plan) && (
+            <button type="button" disabled={payLoading} onClick={handleUpgrade} className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 font-body text-sm font-semibold text-slate-900 hover:bg-amber-300">
+              {payLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Upgrade to Pro"}
+            </button>
+          )}
+        </div>
       </section>
       <section className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
         <h2 className="fd text-base font-bold text-slate-900">Language & learning</h2>
@@ -1368,18 +1602,19 @@ function SettingsPage() {
       <section className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
         <div className="flex items-center gap-2"><HardDrive className="h-4 w-4 text-slate-500" /><h2 className="fd text-base font-bold text-slate-900">Offline storage</h2></div>
         <div><div className="flex justify-between fb text-sm"><span className="text-slate-600">Used</span><span className="font-semibold text-slate-800">134 MB / 2 GB</span></div><div className="mt-2 h-2 rounded-full bg-stone-100"><div className="h-2 rounded-full bg-emerald-500" style={{ width: "6.7%" }} /></div></div>
-        <button type="button" className="fb text-sm font-semibold text-rose-600 hover:text-rose-700">Clear all downloads</button>
+        <button type="button" onClick={clearDownloads} className="fb text-sm font-semibold text-rose-600 hover:text-rose-700">Clear all downloads</button>
+        {statusMsg && <p className="fb text-xs text-emerald-600">{statusMsg}</p>}
       </section>
       <section className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
         <div className="flex items-center gap-2"><Shield className="h-4 w-4 text-slate-500" /><h2 className="fd text-base font-bold text-slate-900">Privacy & data</h2></div>
         <div className="flex items-center justify-between"><div><p className="fb text-sm font-semibold text-slate-800">Keep answers beyond 30 days</p><p className="fb text-xs text-slate-500">By default answers are deleted after 30 days (GDPR)</p></div><Tog on={retain} fn={setRetain} label="Retain answers" /></div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <button type="button" className="flex-1 rounded-full border border-stone-200 py-2.5 fb text-sm font-semibold text-slate-700 hover:bg-stone-50">Export my data</button>
-          <button type="button" className="flex-1 rounded-full border border-rose-200 py-2.5 fb text-sm font-semibold text-rose-600 hover:bg-rose-50">Delete account</button>
+          <button type="button" onClick={() => window.location.href = "/privacy"} className="flex-1 rounded-full border border-stone-200 py-2.5 fb text-sm font-semibold text-slate-700 hover:bg-stone-50">Export my data</button>
+          <button type="button" onClick={deleteAccount} className="flex-1 rounded-full border border-rose-200 py-2.5 fb text-sm font-semibold text-rose-600 hover:bg-rose-50">Delete account</button>
         </div>
-        <div className="rounded-xl bg-stone-50 p-3"><p className="fb text-xs text-slate-500">StudyPilot AI complies with GDPR and COPPA. Users under 13 require parent/guardian consent. <span className="text-emerald-600 underline cursor-pointer">Read our privacy policy</span></p></div>
+        <div className="rounded-xl bg-stone-50 p-3"><p className="fb text-xs text-slate-500">StudyPilot AI complies with GDPR and COPPA. Users under 13 require parent/guardian consent. <button type="button" onClick={() => window.location.href = "/privacy"} className="text-emerald-600 underline">Read our privacy policy</button></p></div>
       </section>
-      <button type="button" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 py-4 fb text-sm font-semibold text-rose-600 hover:bg-rose-50"><LogOut className="h-4 w-4" />Sign out</button>
+      <button type="button" onClick={async () => { await logout(); window.location.href = "/auth"; }} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 py-4 fb text-sm font-semibold text-rose-600 hover:bg-rose-50"><LogOut className="h-4 w-4" />Sign out</button>
     </div>
   );
 }

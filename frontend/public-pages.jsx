@@ -2,36 +2,9 @@
 
 import { useState } from "react";
 import { Brain, BookOpen, ListChecks, BarChart3, WifiOff, Mic, Languages, CalendarDays, FileText, Trophy, Users, GraduationCap, ChevronRight, ChevronDown, CheckCircle2, Globe2, Zap, Shield, Heart, Star, MapPin, Mail, Phone, Send, ArrowRight, Sparkles, Target, Clock, TrendingUp } from "lucide-react";
+import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');.fd{font-family:'Lexend',system-ui,sans-serif}.fb{font-family:'Inter',system-ui,sans-serif}`;
-
-function OWLogo({ size = 40 }) {
-  return (
-    <svg viewBox="0 0 200 220" width={size} height={size * 1.1} xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 175 Q100 158 170 175 L170 205 Q100 188 30 205 Z" fill="#22c55e" />
-      <path d="M30 188 Q100 172 170 188 L170 205 Q100 188 30 205 Z" fill="#f97316" />
-      <path d="M30 175 Q100 158 170 175" stroke="#3b82f6" strokeWidth="10" fill="none" />
-      <line x1="100" y1="158" x2="100" y2="208" stroke="#0f172a" strokeWidth="6" />
-      <circle cx="100" cy="102" r="76" fill="#0f172a" />
-      <circle cx="100" cy="110" r="60" fill="white" />
-      <polygon points="100,18 42,52 158,52" fill="#0f172a" />
-      <rect x="40" y="47" width="120" height="18" rx="3" fill="#1e293b" />
-      <line x1="158" y1="52" x2="172" y2="80" stroke="#eab308" strokeWidth="5" strokeLinecap="round" />
-      <circle cx="172" cy="86" r="8" fill="#eab308" />
-      <circle cx="68" cy="97" r="27" fill="white" />
-      <circle cx="132" cy="97" r="27" fill="white" />
-      <circle cx="68" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <circle cx="132" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <line x1="95" y1="97" x2="105" y2="97" stroke="#0f172a" strokeWidth="5" />
-      <circle cx="68" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="132" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="62" cy="91" r="5" fill="white" />
-      <circle cx="126" cy="91" r="5" fill="white" />
-      <polygon points="100,124 86,142 114,142" fill="#f97316" />
-      <path d="M76 152 Q100 168 124 152" stroke="#0f172a" strokeWidth="5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 const ALL_FEATURES = [
   { icon: Brain, color: "text-indigo-600 bg-indigo-100", title: "AI Tutor Engine", desc: "Every topic explained four ways — Beginner, Standard, Advanced, and Naija Pidgin — with definitions, key concepts, real-life analogies, worked examples and a recap. Powered by Gemini 3.", tag: "Core AI" },
@@ -78,17 +51,17 @@ function PublicNav({ page, setPage }) {
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <a href="#" onClick={() => setPage("features")} className="flex items-center gap-2.5">
-          <OWLogo size={36} />
+          <StudyPilotLogo size={36} priority />
           <div className="hidden sm:block"><p className="fd text-base font-bold text-slate-900 leading-tight">StudyPilot AI</p><p className="fb text-xs text-slate-400">Quality education for every student</p></div>
         </a>
         <nav className="hidden items-center gap-8 fb text-sm font-medium text-slate-600 md:flex">
-          {[["features", "Features"], ["about", "About"], ["contact", "Contact"]].map(([k, l]) => (
+          {[["features", "Features"], ["pricing", "Pricing"], ["about", "About"], ["contact", "Contact"]].map(([k, l]) => (
             <button key={k} type="button" onClick={() => setPage(k)} className={"transition hover:text-slate-900 " + (page === k ? "text-emerald-600 font-semibold" : "")}>{l}</button>
           ))}
         </nav>
         <div className="flex items-center gap-3">
-          <button type="button" className="hidden fb text-sm font-semibold text-slate-600 hover:text-slate-900 sm:block">Sign in</button>
-          <button type="button" className="rounded-full bg-amber-400 px-4 py-2 fb text-sm font-bold text-slate-900 hover:bg-amber-300 transition">Get started free</button>
+          <button type="button" onClick={() => window.location.href = "/auth"} className="hidden fb text-sm font-semibold text-slate-600 hover:text-slate-900 sm:block">Sign in</button>
+          <button type="button" onClick={() => window.location.href = "/auth"} className="rounded-full bg-amber-400 px-4 py-2 fb text-sm font-bold text-slate-900 hover:bg-amber-300 transition">Get started free</button>
           <button type="button" onClick={() => setOpen(v => !v)} className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 hover:bg-stone-100 md:hidden" aria-label="Menu">
             <div className="space-y-1"><span className="block h-0.5 w-5 bg-slate-600" /><span className="block h-0.5 w-5 bg-slate-600" /><span className="block h-0.5 w-5 bg-slate-600" /></div>
           </button>
@@ -96,7 +69,7 @@ function PublicNav({ page, setPage }) {
       </div>
       {open && (
         <div className="border-t border-stone-200 bg-white px-4 py-4 md:hidden">
-          {[["features", "Features"], ["about", "About"], ["contact", "Contact"]].map(([k, l]) => (
+          {[["features", "Features"], ["pricing", "Pricing"], ["about", "About"], ["contact", "Contact"]].map(([k, l]) => (
             <button key={k} type="button" onClick={() => { setPage(k); setOpen(false); }} className="flex w-full items-center justify-between py-3 fb text-sm font-medium text-slate-700 border-b border-stone-100 last:border-0">
               {l}<ChevronRight className="h-4 w-4 text-slate-400" />
             </button>
@@ -201,10 +174,55 @@ function FeaturesPage() {
       {/* CTA */}
       <section className="bg-slate-900 py-20">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="flex justify-center mb-6"><OWLogo size={64} /></div>
+          <div className="flex justify-center mb-6"><StudyPilotLogo size={64} priority /></div>
           <h2 className="fd text-3xl font-bold text-white sm:text-4xl">Ready to transform how Nigeria learns?</h2>
           <p className="mt-4 fb text-lg text-slate-300">Free forever. Works in Pidgin. Works without internet.</p>
           <button type="button" className="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-400 px-8 py-4 fd text-base font-bold text-slate-900 hover:bg-amber-300 transition">Create my free account <ArrowRight className="h-4 w-4" /></button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* PRICING PAGE */
+function PricingPage() {
+  const plans = [
+    { name: "Free", price: "₦0", period: "/forever", desc: "Start learning with the essentials.", features: ["AI tutor — 3 lessons/day", "Adaptive quizzes", "English & Pidgin mode", "1 offline subject pack", "Progress dashboard"], cta: "Start free", highlight: false },
+    { name: "Pro", price: "₦1,500", period: "/month", desc: "Everything a serious student needs.", features: ["Unlimited AI tutoring", "All offline packs (60+ subjects)", "Voice lessons (TTS)", "Full exam prep for all 6 boards", "Parent progress reports", "Resource generator"], cta: "Go Pro", highlight: true },
+    { name: "School", price: "Custom", period: " pricing", desc: "For classrooms, schools and groups.", features: ["Everything in Pro per student", "Teacher classroom dashboards", "Class analytics & rankings", "Admin & curriculum management", "Onboarding & training support", "Priority support"], cta: "Contact us", highlight: false },
+  ];
+
+  return (
+    <div>
+      <section className="bg-slate-900 py-16 md:py-20">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <p className="fb text-sm font-semibold uppercase tracking-wide text-amber-300">Pricing</p>
+          <h1 className="mt-4 fd text-4xl font-bold text-white sm:text-5xl">Free to start. Affordable to grow.</h1>
+          <p className="mt-4 fb text-lg text-slate-300 max-w-2xl mx-auto">A freemium model for individual students, with school-wide plans for classrooms and administrators.</p>
+        </div>
+      </section>
+
+      <section className="bg-stone-50 py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {plans.map((tier) => (
+              <div key={tier.name} className={"rounded-2xl border p-8 " + (tier.highlight ? "border-amber-400 bg-slate-900 text-white shadow-xl" : "border-stone-200 bg-white")}>
+                {tier.highlight && <span className="inline-flex items-center rounded-full bg-amber-400 px-3 py-1 fb text-xs font-bold text-slate-900">Most popular</span>}
+                <h2 className={"mt-4 fd text-xl font-bold " + (tier.highlight ? "text-white" : "text-slate-900")}>{tier.name}</h2>
+                <p className={"mt-2 fd text-3xl font-bold " + (tier.highlight ? "text-white" : "text-slate-900")}>{tier.price}<span className={"fb text-sm font-medium " + (tier.highlight ? "text-slate-400" : "text-slate-500")}>{tier.period}</span></p>
+                <p className={"mt-2 fb text-sm " + (tier.highlight ? "text-slate-300" : "text-slate-600")}>{tier.desc}</p>
+                <ul className="mt-6 space-y-3">
+                  {tier.features.map((f) => (
+                    <li key={f} className={"flex items-start gap-2 fb text-sm " + (tier.highlight ? "text-slate-200" : "text-slate-700")}>
+                      <CheckCircle2 className={"mt-0.5 h-4 w-4 flex-none " + (tier.highlight ? "text-amber-400" : "text-emerald-500")} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button type="button" onClick={() => window.location.href = "/auth"} className={"mt-8 w-full rounded-full py-3 fd text-sm font-bold transition " + (tier.highlight ? "bg-amber-400 text-slate-900 hover:bg-amber-300" : "bg-slate-900 text-white hover:bg-slate-800")}>{tier.cta}</button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
@@ -318,8 +336,8 @@ function AboutPage() {
             ))}
           </div>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <button type="button" className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-7 py-3.5 fd text-base font-bold text-slate-900 hover:bg-amber-300">Join us <ArrowRight className="h-4 w-4" /></button>
-            <button type="button" className="inline-flex items-center gap-2 rounded-full border border-slate-700 px-7 py-3.5 fd text-base font-bold text-white hover:border-slate-500">Partner with us</button>
+            <button type="button" onClick={() => window.location.href = "/contact"} className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-7 py-3.5 fd text-base font-bold text-slate-900 hover:bg-amber-300">Join us <ArrowRight className="h-4 w-4" /></button>
+            <button type="button" onClick={() => window.location.href = "/contact"} className="inline-flex items-center gap-2 rounded-full border border-slate-700 px-7 py-3.5 fd text-base font-bold text-white hover:border-slate-500">Partner with us</button>
           </div>
         </div>
       </section>
@@ -332,7 +350,13 @@ function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", org: "", role: "Student", subject: "", message: "" });
   const [sent, setSent] = useState(false);
   const [open, setOpen] = useState(null);
-  function submit() { if (form.name && form.email && form.message) setSent(true); }
+  function submit() {
+    if (!form.name || !form.email || !form.message) return;
+    const subject = encodeURIComponent(form.subject || "StudyPilot AI contact request");
+    const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nOrganisation: ${form.org || "-"}\nRole: ${form.role}\n\n${form.message}`);
+    window.location.href = `mailto:Linkxeetech@gmail.com?subject=${subject}&body=${body}`;
+    setSent(true);
+  }
   return (
     <div>
       {/* Hero */}
@@ -381,21 +405,38 @@ function ContactPage() {
             <div className="space-y-6">
               <div className="rounded-2xl border border-stone-200 bg-white p-6 space-y-5">
                 <h3 className="fd text-base font-bold text-slate-900">Contact information</h3>
-                {[{ icon: Mail, label: "Email", val: "hello@studypilot.ai" }, { icon: Phone, label: "WhatsApp", val: "+234 800 STUDYPILOT" }, { icon: MapPin, label: "Headquarters", val: "Abuja, Federal Capital Territory, Nigeria" }, { icon: Clock, label: "Response time", val: "Within 24 hours on business days" }].map((c) => (
-                  <div key={c.label} className="flex items-start gap-3"><div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-stone-100 text-slate-500"><c.icon className="h-4 w-4" /></div><div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400">{c.label}</p><p className="fb text-sm font-medium text-slate-800 mt-0.5">{c.val}</p></div></div>
+                {[{ icon: Mail, label: "Email", val: "Linkxeetech@gmail.com", link: "mailto:Linkxeetech@gmail.com" }, { icon: Phone, label: "WhatsApp", val: "+2347084607844", link: "https://wa.me/2347084607844" }, { icon: MapPin, label: "Headquarters", val: "Abuja, Federal Capital Territory, Nigeria" }, { icon: Clock, label: "Response time", val: "Within 24 hours on business days" }].map((c) => (
+                  <div key={c.label} className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-stone-100 text-slate-500">
+                      <c.icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400">{c.label}</p>
+                      {c.link ? (
+                        <a href={c.link} target="_blank" rel="noopener noreferrer" className="fb text-sm font-medium text-emerald-600 hover:text-emerald-700 mt-0.5 block">{c.val}</a>
+                      ) : (
+                        <p className="fb text-sm font-medium text-slate-800 mt-0.5">{c.val}</p>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
               <div className="rounded-2xl bg-slate-900 p-6 text-white">
                 <GraduationCap className="h-8 w-8 text-amber-400" />
                 <h3 className="mt-3 fd text-lg font-bold">Is your school interested?</h3>
                 <p className="mt-2 fb text-sm text-slate-300 leading-relaxed">We offer custom school plans with teacher classrooms, admin controls, class analytics, and dedicated onboarding support. Get a personalised quote for your school.</p>
-                <button type="button" className="mt-5 w-full rounded-full bg-amber-400 py-3 fd text-sm font-bold text-slate-900 hover:bg-amber-300 transition">Request school demo</button>
+                <button type="button" onClick={() => window.location.href = "mailto:Linkxeetech@gmail.com?subject=School%20demo%20request"} className="mt-5 w-full rounded-full bg-amber-400 py-3 fd text-sm font-bold text-slate-900 hover:bg-amber-300 transition">Request school demo</button>
               </div>
               <div className="rounded-2xl border border-stone-200 bg-white p-6">
                 <h3 className="fd text-base font-bold text-slate-900 mb-2">Social media</h3>
                 <div className="flex gap-3">
-                  {["Twitter / X", "LinkedIn", "Facebook", "Instagram"].map((s) => (
-                    <button key={s} type="button" title={s} className="rounded-lg border border-stone-200 px-3 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50 transition">{s.split(" / ")[0]}</button>
+                  {[
+                    { label: "Twitter / X", href: "https://x.com" },
+                    { label: "LinkedIn", href: "https://www.linkedin.com" },
+                    { label: "Facebook", href: "https://www.facebook.com" },
+                    { label: "Instagram", href: "https://www.instagram.com" },
+                  ].map((s) => (
+                    <button key={s.label} type="button" title={s.label} onClick={() => window.open(s.href, "_blank", "noopener,noreferrer")} className="rounded-lg border border-stone-200 px-3 py-2 fb text-xs font-semibold text-slate-600 hover:bg-stone-50 transition">{s.label.split(" / ")[0]}</button>
                   ))}
                 </div>
               </div>
@@ -428,17 +469,51 @@ function ContactPage() {
   );
 }
 
+/* PRIVACY PAGE */
+function PrivacyPage() {
+  return (
+    <div>
+      <section className="bg-slate-900 py-16 md:py-20">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <h1 className="fd text-4xl font-bold text-white sm:text-5xl">Privacy Policy</h1>
+          <p className="mt-4 fb text-lg text-slate-300">Effective Date: June 2026</p>
+        </div>
+      </section>
+      <section className="bg-stone-50 py-16 md:py-24">
+        <div className="mx-auto max-w-3xl px-6 space-y-8 fb text-slate-700 leading-relaxed">
+          <div>
+            <h2 className="fd text-2xl font-bold text-slate-900 mb-4">1. Information We Collect</h2>
+            <p>We collect information you provide directly to us (such as name, email, and grade level) as well as data on your learning progress to personalize your AI tutor experience. For users under 13, we require parent or guardian consent.</p>
+          </div>
+          <div>
+            <h2 className="fd text-2xl font-bold text-slate-900 mb-4">2. How We Use Your Data</h2>
+            <p>Your data is strictly used to improve your educational experience. We use AI (via Google Gemini) to generate personalized explanations and quizzes. Student interactions are retained only as long as necessary and are not used for advertising.</p>
+          </div>
+          <div>
+            <h2 className="fd text-2xl font-bold text-slate-900 mb-4">3. GDPR and COPPA Compliance</h2>
+            <p>We adhere to GDPR and COPPA guidelines. Parents can request to review, modify, or delete their child's data at any time by contacting us.</p>
+          </div>
+          <div>
+            <h2 className="fd text-2xl font-bold text-slate-900 mb-4">4. Contact Us</h2>
+            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:Linkxeetech@gmail.com" className="text-emerald-600 hover:text-emerald-700">Linkxeetech@gmail.com</a>.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 /* PUBLIC FOOTER */
 function PublicFooter() {
   return (
     <footer className="bg-slate-900 py-12">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-8 border-b border-slate-800 pb-8 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-3"><OWLogo size={40} /><div><p className="fd text-base font-bold text-white">StudyPilot AI</p><p className="fb text-xs text-slate-400">Quality education for every student</p></div></div>
+          <div className="flex items-center gap-3"><StudyPilotLogo size={40} /><div><p className="fd text-base font-bold text-white">StudyPilot AI</p><p className="fb text-xs text-slate-400">Quality education for every student</p></div></div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Product</p><div className="space-y-2">{["Features", "Pricing", "Exam prep", "Offline packs"].map(l => <p key={l} className="fb text-sm text-slate-300 hover:text-white cursor-pointer">{l}</p>)}</div></div>
-            <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Company</p><div className="space-y-2">{["About", "Contact", "Blog", "Careers"].map(l => <p key={l} className="fb text-sm text-slate-300 hover:text-white cursor-pointer">{l}</p>)}</div></div>
-            <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Legal</p><div className="space-y-2">{["Privacy Policy", "Terms of Service", "Cookie Policy", "GDPR"].map(l => <p key={l} className="fb text-sm text-slate-300 hover:text-white cursor-pointer">{l}</p>)}</div></div>
+            <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Product</p><div className="space-y-2">{["Features", "Pricing", "Exam prep", "Offline packs"].map(l => <button key={l} type="button" onClick={() => window.location.href = l === "Pricing" ? "/pricing" : "/features"} className="block fb text-sm text-slate-300 hover:text-white text-left">{l}</button>)}</div></div>
+            <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Company</p><div className="space-y-2">{["About", "Contact", "Blog", "Careers"].map(l => <button key={l} type="button" onClick={() => window.location.href = l === "Contact" ? "/contact" : l === "About" ? "/about" : "/contact"} className="block fb text-sm text-slate-300 hover:text-white text-left">{l}</button>)}</div></div>
+            <div><p className="fb text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Legal</p><div className="space-y-2">{["Privacy Policy", "Terms of Service", "Cookie Policy", "GDPR"].map(l => <button key={l} type="button" onClick={() => window.location.href = l === "Privacy Policy" ? "/privacy" : "/privacy"} className="block fb text-sm text-slate-300 hover:text-white text-left">{l}</button>)}</div></div>
           </div>
         </div>
         <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between fb text-sm text-slate-400">
@@ -458,8 +533,10 @@ export default function PublicPages({ initialPage = "features" }) {
       <style>{FONTS}</style>
       <PublicNav page={page} setPage={setPage} />
       {page === "features" && <FeaturesPage />}
+      {page === "pricing" && <PricingPage />}
       {page === "about" && <AboutPage />}
       {page === "contact" && <ContactPage />}
+      {page === "privacy" && <PrivacyPage />}
       <PublicFooter />
     </div>
   );

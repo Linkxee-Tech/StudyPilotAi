@@ -3,36 +3,9 @@
 import { useState } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Users, BookOpen, BarChart3, Settings, Bell, ChevronRight, CheckCircle2, AlertTriangle, Flame, Star, Trophy, TrendingUp, Plus, Search, Filter, MoreVertical, Wifi, WifiOff, Mail, Phone, MapPin, Clock, Target, Zap, GraduationCap, Shield, Eye, Trash2, Edit3, Download, RefreshCw, Check, X, UserPlus, BookMarked, ClipboardList } from "lucide-react";
+import { StudyPilotLogo } from "../src/components/StudyPilotLogo";
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');.fd{font-family:'Lexend',system-ui,sans-serif}.fb{font-family:'Inter',system-ui,sans-serif}`;
-
-function OWLogo({ size = 36 }) {
-  return (
-    <svg viewBox="0 0 200 220" width={size} height={size * 1.1} xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 175 Q100 158 170 175 L170 205 Q100 188 30 205 Z" fill="#22c55e" />
-      <path d="M30 188 Q100 172 170 188 L170 205 Q100 188 30 205 Z" fill="#f97316" />
-      <path d="M30 175 Q100 158 170 175" stroke="#3b82f6" strokeWidth="10" fill="none" />
-      <line x1="100" y1="158" x2="100" y2="208" stroke="#0f172a" strokeWidth="6" />
-      <circle cx="100" cy="102" r="76" fill="#0f172a" />
-      <circle cx="100" cy="110" r="60" fill="white" />
-      <polygon points="100,18 42,52 158,52" fill="#0f172a" />
-      <rect x="40" y="47" width="120" height="18" rx="3" fill="#1e293b" />
-      <line x1="158" y1="52" x2="172" y2="80" stroke="#eab308" strokeWidth="5" strokeLinecap="round" />
-      <circle cx="172" cy="86" r="8" fill="#eab308" />
-      <circle cx="68" cy="97" r="27" fill="white" />
-      <circle cx="132" cy="97" r="27" fill="white" />
-      <circle cx="68" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <circle cx="132" cy="97" r="27" fill="none" stroke="#0f172a" strokeWidth="7" />
-      <line x1="95" y1="97" x2="105" y2="97" stroke="#0f172a" strokeWidth="5" />
-      <circle cx="68" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="132" cy="97" r="13" fill="#1e3a8a" />
-      <circle cx="62" cy="91" r="5" fill="white" />
-      <circle cx="126" cy="91" r="5" fill="white" />
-      <polygon points="100,124 86,142 114,142" fill="#f97316" />
-      <path d="M76 152 Q100 168 124 152" stroke="#0f172a" strokeWidth="5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 const PARENT_CHILDREN = [{ name: "Tunde Adekunle", grade: "SS2", school: "Birnin Kebbi High School", avatar: "T" }, { name: "Kemi Adekunle", grade: "JSS3", school: "Birnin Kebbi High School", avatar: "K" }];
 const PARENT_SUBJECTS = [{ sub: "Mathematics", s: 88, delta: +4 }, { sub: "Biology", s: 82, delta: +7 }, { sub: "English Language", s: 70, delta: -2 }, { sub: "Chemistry", s: 64, delta: +3 }, { sub: "Government", s: 55, delta: -5 }, { sub: "Physics", s: 41, delta: +9 }];
@@ -71,7 +44,7 @@ function DashHeader({ logo, title, subtitle, role, tabs, activeTab, setTab }) {
   return (
     <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-3"><OWLogo size={32} /><div><p className="fd text-sm font-bold text-slate-900">{title}</p><p className="fb text-xs text-slate-400">{subtitle}</p></div></div>
+        <div className="flex items-center gap-3"><StudyPilotLogo size={32} /><div><p className="fd text-sm font-bold text-slate-900">{title}</p><p className="fb text-xs text-slate-400">{subtitle}</p></div></div>
         <div className="flex items-center gap-2">
           <Bdg ch={role} cls="bg-indigo-100 text-indigo-700" />
           <button type="button" aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-stone-100"><Bell className="h-5 w-5" /><span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" /></button>
@@ -584,8 +557,8 @@ function AdminDashboard() {
 }
 
 /* ROOT — Role switcher for demo */
-export default function RoleDashboards() {
-  const [role, setRole] = useState("parent");
+export default function RoleDashboards({ initialRole = "parent" }) {
+  const [role, setRole] = useState(initialRole);
   return (
     <div className="fb">
       <style>{FONTS}</style>
@@ -596,7 +569,7 @@ export default function RoleDashboards() {
         ))}
       </div>
       <div className="hidden lg:flex fixed left-0 top-0 bottom-0 w-20 flex-col items-center gap-3 border-r border-stone-200 bg-white pt-4 z-50">
-        <OWLogo size={36} />
+        <StudyPilotLogo size={36} priority />
         <div className="flex flex-col gap-2 mt-4">
           {[{ k: "parent", l: "Parent", icon: Users }, { k: "teacher", l: "Teacher", icon: BookOpen }, { k: "admin", l: "Admin", icon: Shield }].map(r => (
             <button key={r.k} type="button" onClick={() => setRole(r.k)} className={"flex flex-col items-center gap-1 rounded-xl p-2 transition " + (role === r.k ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-stone-100 hover:text-slate-700")}>

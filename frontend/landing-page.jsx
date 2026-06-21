@@ -170,20 +170,27 @@ function LessonCard({ mode, setMode, content }) {
 }
 
 function Nav() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const NAV_LINKS = [
+    { label: 'Features', href: '/features' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+  ];
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-900/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <a href="#top" className="flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
+        <a href="/" className="flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
           <StudyPilotLogo size={36} priority />
           <span className="font-display text-lg font-bold text-white">
             StudyPilot <span className="text-amber-400">AI</span>
           </span>
         </a>
+        {/* Desktop nav */}
         <nav className="hidden items-center gap-8 font-body text-sm font-medium text-slate-300 md:flex">
-          <a href="#features" className="transition hover:text-white">Features</a>
-          <a href="#subjects" className="transition hover:text-white">Subjects</a>
-          <a href="#exams" className="transition hover:text-white">Exam Prep</a>
-          <a href="#pricing" className="transition hover:text-white">Pricing</a>
+          {NAV_LINKS.map(({ label, href }) => (
+            <a key={label} href={href} className="transition hover:text-white">{label}</a>
+          ))}
         </nav>
         <div className="flex items-center gap-3">
           <button type="button" onClick={() => window.location.href = '/auth'} className="hidden font-body text-sm font-semibold text-slate-300 transition hover:text-white sm:inline-block">
@@ -192,8 +199,30 @@ function Nav() {
           <button type="button" onClick={() => window.location.href = '/auth'} className="rounded-full bg-amber-400 px-5 py-2.5 font-body text-sm font-semibold text-slate-900 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200">
             Get started free
           </button>
+          {/* Mobile hamburger */}
+          <button type="button" onClick={() => setMobileOpen(v => !v)} className="flex h-10 w-10 items-center justify-center rounded-full text-slate-300 hover:bg-slate-800 md:hidden" aria-label="Open menu">
+            <div className="space-y-1.5">
+              <span className="block h-0.5 w-5 bg-slate-300" />
+              <span className="block h-0.5 w-5 bg-slate-300" />
+              <span className="block h-0.5 w-5 bg-slate-300" />
+            </div>
+          </button>
         </div>
       </div>
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="border-t border-slate-800 bg-slate-900 px-6 py-4 md:hidden">
+          {NAV_LINKS.map(({ label, href }) => (
+            <a key={label} href={href} className="flex w-full items-center justify-between py-3 font-body text-sm font-medium text-slate-300 border-b border-slate-800 last:border-0 hover:text-white">
+              {label}
+            </a>
+          ))}
+          <div className="mt-4 flex flex-col gap-3">
+            <button type="button" onClick={() => window.location.href = '/auth'} className="w-full rounded-full border border-slate-600 py-2.5 font-body text-sm font-semibold text-slate-300 hover:bg-slate-800">Log in</button>
+            <button type="button" onClick={() => window.location.href = '/auth'} className="w-full rounded-full bg-amber-400 py-2.5 font-body text-sm font-semibold text-slate-900 hover:bg-amber-300">Get started free</button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -510,14 +539,19 @@ function Footer() {
     { icon: Mic, label: 'Voice lessons' },
     { icon: CheckCircle2, label: 'WCAG 2.1 AA' },
   ];
+  const FOOTER_LINKS = [
+    { label: 'Features', href: '/features' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+    { label: 'Privacy', href: '/privacy' },
+  ];
   return (
     <footer className="bg-slate-900 py-12">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-8 border-b border-slate-800 pb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400">
-              <Sparkles className="h-5 w-5 text-slate-900" />
-            </div>
+            <StudyPilotLogo size={36} />
             <span className="font-display text-lg font-bold text-white">
               StudyPilot <span className="text-amber-400">AI</span>
             </span>
@@ -530,13 +564,45 @@ function Footer() {
             ))}
           </div>
         </div>
-        <div className="mt-8 flex flex-col gap-4 font-body text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>\u00a9 2026 StudyPilot AI. Quality education, every device, every language.</p>
-          <div className="flex gap-6">
-            <a href="#features" className="transition hover:text-white">Features</a>
-            <a href="#pricing" className="transition hover:text-white">Pricing</a>
-            <a href="#" className="transition hover:text-white">Privacy</a>
-            <a href="#" className="transition hover:text-white">Contact</a>
+        <div className="mt-8 grid grid-cols-2 gap-8 border-b border-slate-800 pb-8 sm:grid-cols-4">
+          <div>
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Platform</p>
+            <div className="space-y-2">
+              {FOOTER_LINKS.slice(0, 3).map(({ label, href }) => (
+                <a key={label} href={href} className="block font-body text-sm text-slate-400 hover:text-white transition">{label}</a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Support</p>
+            <div className="space-y-2">
+              <a href="/contact" className="block font-body text-sm text-slate-400 hover:text-white transition">Contact us</a>
+              <a href="mailto:Linkxeetech@gmail.com" className="block font-body text-sm text-slate-400 hover:text-white transition">Email support</a>
+              <a href="https://wa.me/2347084607844" target="_blank" rel="noopener noreferrer" className="block font-body text-sm text-slate-400 hover:text-white transition">WhatsApp</a>
+            </div>
+          </div>
+          <div>
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Legal</p>
+            <div className="space-y-2">
+              <a href="/privacy" className="block font-body text-sm text-slate-400 hover:text-white transition">Privacy Policy</a>
+              <a href="/privacy" className="block font-body text-sm text-slate-400 hover:text-white transition">Terms of Service</a>
+            </div>
+          </div>
+          <div>
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Exams</p>
+            <div className="space-y-2">
+              {['WAEC', 'JAMB', 'NECO', 'NABTEB', 'GCSE', 'SAT'].map(e => (
+                <a key={e} href="/auth" className="block font-body text-sm text-slate-400 hover:text-white transition">{e} Prep</a>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-col gap-3 font-body text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© 2026 StudyPilot AI · Linkxee Tech · Abuja, Nigeria</p>
+          <div className="flex gap-5">
+            {FOOTER_LINKS.map(({ label, href }) => (
+              <a key={label} href={href} className="transition hover:text-white">{label}</a>
+            ))}
           </div>
         </div>
       </div>

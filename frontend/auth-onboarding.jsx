@@ -11,6 +11,8 @@ const GRADES = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"];
 const EXAM_BOARDS = ["WAEC", "JAMB", "NECO", "NABTEB", "GCSE", "SAT"];
 const STUDY_TIMES = ["Less than 1 hour", "1–2 hours", "2–3 hours", "3–4 hours", "4+ hours"];
 const CORE_SUBJECTS = ["English Language", "Mathematics", "Biology", "Chemistry", "Physics", "Economics", "Government", "Geography", "Literature in English", "Financial Accounting", "Civic Education", "Agricultural Science", "Computer Science", "History", "Further Mathematics"];
+const JSS_SUBJECTS = ["English Language", "Mathematics", "Basic Science", "Basic Technology", "Business Studies", "Civic Education", "Agricultural Science", "Computer Science", "Home Economics", "Social Studies", "Physical and Health Education", "Christian Religious Studies", "Islamic Religious Studies", "French", "Yoruba", "Igbo", "Hausa"];
+const SS_SUBJECTS = ["English Language", "Mathematics", "Biology", "Chemistry", "Physics", "Economics", "Government", "Geography", "Literature in English", "Financial Accounting", "Civic Education", "Agricultural Science", "Computer Science", "History", "Further Mathematics", "Commerce", "Christian Religious Studies", "Islamic Religious Studies", "French", "Yoruba", "Igbo", "Hausa"];
 const ROLES = [
   { key: "student", label: "Student", icon: GraduationCap, desc: "Learn, practise and track your progress", color: "border-emerald-300 bg-emerald-50 text-emerald-700" },
   { key: "parent", label: "Parent / Guardian", icon: Users, desc: "Monitor your child's learning and performance", color: "border-indigo-300 bg-indigo-50 text-indigo-700" },
@@ -198,12 +200,16 @@ function GradePage({ goTo, signupData, updateData }) {
 }
 
 function SubjectsPage({ goTo, signupData, updateData }) {
-  const [subs, setSubs] = useState(signupData.subs || ["Mathematics", "English Language", "Biology"]);
+  const isJSS = signupData.grade?.startsWith("JSS");
+  const availableSubjects = isJSS ? JSS_SUBJECTS : SS_SUBJECTS;
+  const initialSubs = (signupData.subs || ["Mathematics", "English Language"]).filter(s => availableSubjects.includes(s));
+  const [subs, setSubs] = useState(initialSubs);
   function toggle(s) { setSubs(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]); }
+  
   return (
     <OnboardingShell step={2} total={4} title="Which subjects are you studying?" subtitle={"Select all that apply. You can change this later."} onBack={() => goTo("grade")} onNext={() => { updateData({ subs }); goTo("exam"); }} nextDisabled={subs.length === 0}>
       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-        {CORE_SUBJECTS.map((s) => {
+        {availableSubjects.map((s) => {
           const on = subs.includes(s);
           return (
             <button key={s} type="button" onClick={() => toggle(s)} className={"flex w-full items-center gap-3 rounded-xl border-2 px-4 py-2.5 text-left transition " + (on ? "border-emerald-400 bg-emerald-50" : "border-stone-200 bg-white hover:border-stone-300")}>
